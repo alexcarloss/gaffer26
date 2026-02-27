@@ -536,7 +536,7 @@ body {
 .card-stats {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.25rem, 0.8vw, 0.4rem);
+  gap: clamp(0.15rem, 0.5vw, 0.25rem);
 }
 
 .stat-row {
@@ -590,9 +590,9 @@ body {
   display: none;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.6rem;
+  gap: 0.4rem;
   margin-top: 0.4rem;
-  padding: 0.5rem 0.3rem;
+  padding: 0.5rem 0.2rem;
   flex-shrink: 0;
   position: relative;
   z-index: 50;
@@ -613,18 +613,18 @@ body {
 
 .stat-btn {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(0.85rem, 2.2vw, 1.1rem);
+  font-size: clamp(0.7rem, 1.8vw, 0.95rem);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0.65rem 1.4rem;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.8rem;
   border: 2px solid #444;
   background: rgba(255,255,255,0.05);
   color: #ddd;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s;
-  min-height: 44px;
+  min-height: 40px;
   touch-action: manipulation;
 }
 
@@ -1673,10 +1673,11 @@ body.shake { animation: shake 0.5s ease; }
     </div>
 
     <div class="stat-buttons" id="stat-buttons">
-      <button class="stat-btn" onclick="pickStat('pace')">🏃 Pace</button>
-      <button class="stat-btn" onclick="pickStat('shooting')">⚽ Shooting</button>
-      <button class="stat-btn" onclick="pickStat('passing')">🎯 Passing</button>
-      <button class="stat-btn" onclick="pickStat('defending')">🛡️ Defending</button>
+      <button class="stat-btn" onclick="pickStat('tekkers')">🎩 Tekkers</button>
+      <button class="stat-btn" onclick="pickStat('shithousery')">😈 Shithousery</button>
+      <button class="stat-btn" onclick="pickStat('madness')">🔥 Madness</button>
+      <button class="stat-btn" onclick="pickStat('clutch')">🎯 Clutch</button>
+      <button class="stat-btn" onclick="pickStat('vibes')">✨ Vibes</button>
     </div>
 
     <button class="ability-btn" id="ability-btn" onclick="activateAbility()"></button>
@@ -2155,123 +2156,124 @@ function handlePeerMessage(data) {
 // ═══════════════════════════════════════════════════════════
 const ALL_CARDS = [
   // ♠ GOALKEEPERS
-  { name:"Peter Schmeichel", nickname:"Star-fish saves, screamed at everyone", position:"Goalkeeper", suit:"♠", rank:14, rankLabel:"A", pace:38, shooting:15, passing:48, defending:95,
-    ability:{ name:"Star-Fish", desc:"Spread yourself impossibly wide — block the opponent's highest stat (their chosen stat is reduced by 20 for this round).", type:"manual" }},
-  { name:"Petr Čech", nickname:"The helmet warrior", position:"Goalkeeper", suit:"♠", rank:13, rankLabel:"K", pace:30, shooting:10, passing:52, defending:93,
+  // Tekkers=technique, Shithousery=dark arts, Madness=chaos energy, Clutch=big moments, Vibes=entertainment value
+  { name:"Peter Schmeichel", nickname:"Star-fish saves, screamed at everyone", position:"Goalkeeper", suit:"♠", rank:14, rankLabel:"A", tekkers:72, shithousery:55, madness:70, clutch:95, vibes:82,
+    ability:{ name:"Star-Fish", desc:"Spread yourself impossibly wide — block the opponent's highest stat (reduced by 20 this round).", type:"manual" }},
+  { name:"Petr Čech", nickname:"The helmet warrior", position:"Goalkeeper", suit:"♠", rank:13, rankLabel:"K", tekkers:68, shithousery:15, madness:25, clutch:90, vibes:65,
     ability:{ name:"The Helmet", desc:"Absorb any hit — if you lose this round, keep your card instead of losing it.", type:"manual" }},
-  { name:"Jens Lehmann", nickname:"Genuinely unhinged", position:"Goalkeeper", suit:"♠", rank:12, rankLabel:"Q", pace:42, shooting:12, passing:45, defending:90,
+  { name:"Jens Lehmann", nickname:"Genuinely unhinged", position:"Goalkeeper", suit:"♠", rank:12, rankLabel:"Q", tekkers:62, shithousery:72, madness:90, clutch:78, vibes:75,
     ability:{ name:"Unhinged", desc:"Intimidate the opponent — their card loses 10 from ALL stats this round.", type:"manual" }},
-  { name:"David Seaman", nickname:"The ponytail, the Ronaldinho lob", position:"Goalkeeper", suit:"♠", rank:11, rankLabel:"J", pace:28, shooting:8, passing:42, defending:88,
-    ability:{ name:"The Ponytail", desc:"Lob the result — swap your highest stat value with your lowest for this round (confuse the AI).", type:"manual" }},
-  { name:"David James", nickname:"Calamity James, Armani model", position:"Goalkeeper", suit:"♠", rank:10, rankLabel:"10", pace:35, shooting:11, passing:40, defending:82,
+  { name:"David Seaman", nickname:"The ponytail, the Ronaldinho lob", position:"Goalkeeper", suit:"♠", rank:11, rankLabel:"J", tekkers:70, shithousery:12, madness:30, clutch:75, vibes:78,
+    ability:{ name:"The Ponytail", desc:"Lob the result — swap your highest stat value with your lowest for this round.", type:"manual" }},
+  { name:"David James", nickname:"Calamity James, Armani model", position:"Goalkeeper", suit:"♠", rank:10, rankLabel:"10", tekkers:55, shithousery:18, madness:80, clutch:35, vibes:82,
     ability:{ name:"Calamity", desc:"Chaos! Both cards get randomized stats (30-90) for this round only.", type:"manual" }},
-  { name:"Jerzy Dudek", nickname:"Wobbly legs in Istanbul", position:"Goalkeeper", suit:"♠", rank:9, rankLabel:"9", pace:30, shooting:7, passing:38, defending:80,
+  { name:"Jerzy Dudek", nickname:"Wobbly legs in Istanbul", position:"Goalkeeper", suit:"♠", rank:9, rankLabel:"9", tekkers:52, shithousery:65, madness:72, clutch:95, vibes:70,
     ability:{ name:"Wobbly Legs", desc:"Distract the opponent — they must pick their stat randomly (CPU picks worst stat).", type:"manual" }},
-  { name:"Tim Howard", nickname:"Scored a goal from his own box", position:"Goalkeeper", suit:"♠", rank:8, rankLabel:"8", pace:32, shooting:18, passing:35, defending:78,
-    ability:{ name:"Long Bomb", desc:"Your Shooting stat becomes 92 this round (he literally scored from his own box).", type:"manual" }},
-  { name:"Shaka Hislop", nickname:"Greatest name in PL history", position:"Goalkeeper", suit:"♠", rank:7, rankLabel:"7", pace:28, shooting:6, passing:33, defending:76,
+  { name:"Tim Howard", nickname:"Scored a goal from his own box", position:"Goalkeeper", suit:"♠", rank:8, rankLabel:"8", tekkers:48, shithousery:10, madness:55, clutch:68, vibes:62,
+    ability:{ name:"Long Bomb", desc:"Your Shithousery becomes 92 this round (he literally scored from his own box).", type:"manual" }},
+  { name:"Shaka Hislop", nickname:"Greatest name in PL history", position:"Goalkeeper", suit:"♠", rank:7, rankLabel:"7", tekkers:50, shithousery:8, madness:25, clutch:60, vibes:85,
     ability:{ name:"Name Power", desc:"Style points — gain +15 to any stat you choose this round.", type:"manual" }},
-  { name:"Paul Robinson", nickname:"Scored from a goal kick", position:"Goalkeeper", suit:"♠", rank:6, rankLabel:"6", pace:26, shooting:22, passing:38, defending:74,
-    ability:{ name:"Goal Kick", desc:"Your Shooting becomes 85 this round.", type:"manual" }},
-  { name:"Neville Southall", nickname:"Now a full-time Twitter activist", position:"Goalkeeper", suit:"♠", rank:5, rankLabel:"5", pace:20, shooting:5, passing:30, defending:72,
+  { name:"Paul Robinson", nickname:"Scored from a goal kick", position:"Goalkeeper", suit:"♠", rank:6, rankLabel:"6", tekkers:42, shithousery:12, madness:50, clutch:55, vibes:58,
+    ability:{ name:"Goal Kick", desc:"Your Shithousery becomes 85 this round.", type:"manual" }},
+  { name:"Neville Southall", nickname:"Now a full-time Twitter activist", position:"Goalkeeper", suit:"♠", rank:5, rankLabel:"5", tekkers:55, shithousery:72, madness:65, clutch:62, vibes:70,
     ability:{ name:"Twitter Rant", desc:"Expose the opponent — reveal their card's stats before you pick yours.", type:"manual" }},
-  { name:"Heurelho Gomes", nickname:"Absolute chaos merchant", position:"Goalkeeper", suit:"♠", rank:4, rankLabel:"4", pace:30, shooting:6, passing:28, defending:68,
+  { name:"Heurelho Gomes", nickname:"Absolute chaos merchant", position:"Goalkeeper", suit:"♠", rank:4, rankLabel:"4", tekkers:35, shithousery:30, madness:88, clutch:25, vibes:72,
     ability:{ name:"Chaos Merchant", desc:"Coin flip — if heads, you win automatically. If tails, you lose automatically.", type:"manual" }},
-  { name:"Robert Green", nickname:"The fumble", position:"Goalkeeper", suit:"♠", rank:3, rankLabel:"3", pace:25, shooting:5, passing:25, defending:64,
+  { name:"Robert Green", nickname:"The fumble", position:"Goalkeeper", suit:"♠", rank:3, rankLabel:"3", tekkers:30, shithousery:8, madness:62, clutch:10, vibes:65,
     ability:{ name:"The Fumble", desc:"So bad it's funny — opponent laughs and loses 15 from their chosen stat.", type:"manual" }},
-  { name:"Massimo Taibi", nickname:"Let it roll through his legs on debut", position:"Goalkeeper", suit:"♠", rank:2, rankLabel:"2", pace:22, shooting:4, passing:20, defending:58,
+  { name:"Massimo Taibi", nickname:"Let it roll through his legs on debut", position:"Goalkeeper", suit:"♠", rank:2, rankLabel:"2", tekkers:22, shithousery:5, madness:70, clutch:8, vibes:72,
     ability:{ name:"Through the Legs", desc:"Nutmeg! Pick any stat — if you win, take TWO extra cards from CPU's pile.", type:"manual" }},
 
   // ♥ DEFENDERS
-  { name:"Rio Ferdinand", nickname:"The Rolls Royce", position:"Defender", suit:"♥", rank:14, rankLabel:"A", pace:72, shooting:38, passing:78, defending:92,
+  { name:"Rio Ferdinand", nickname:"The Rolls Royce", position:"Defender", suit:"♥", rank:14, rankLabel:"A", tekkers:82, shithousery:25, madness:20, clutch:88, vibes:85,
     ability:{ name:"Rolls Royce", desc:"Smooth operator — gain +8 to ALL stats this round.", type:"manual" }},
-  { name:"John Terry", nickname:"Full kit weirdo, captain, leader, controversy", position:"Defender", suit:"♥", rank:13, rankLabel:"K", pace:55, shooting:42, passing:62, defending:93,
+  { name:"John Terry", nickname:"Full kit weirdo, captain, leader, controversy", position:"Defender", suit:"♥", rank:13, rankLabel:"K", tekkers:72, shithousery:85, madness:55, clutch:90, vibes:65,
     ability:{ name:"Full Kit", desc:"Captain's armband — you pick both YOUR stat AND the opponent's stat this round.", type:"manual" }},
-  { name:"Ashley Cole", nickname:"Shot a work experience kid with an air rifle", position:"Defender", suit:"♥", rank:12, rankLabel:"Q", pace:82, shooting:35, passing:68, defending:88,
-    ability:{ name:"Air Rifle", desc:"Snipe! Your Pace gets +15 and if you win, the opponent discards their next hand card.", type:"manual" }},
-  { name:"Nemanja Vidić", nickname:"Heading machine, zero fear", position:"Defender", suit:"♥", rank:11, rankLabel:"J", pace:60, shooting:40, passing:48, defending:91,
-    ability:{ name:"Zero Fear", desc:"Head it clear — your Defending becomes 99 this round.", type:"manual" }},
-  { name:"Stuart Pearce", nickname:"Psycho", position:"Defender", suit:"♥", rank:10, rankLabel:"10", pace:68, shooting:55, passing:52, defending:85,
-    ability:{ name:"Psycho", desc:"Pure aggression — gain +20 Shooting, but lose 15 Defending.", type:"manual" }},
-  { name:"Vinnie Jones", nickname:"Grabbed Gazza by the balls, literally", position:"Defender", suit:"♥", rank:9, rankLabel:"9", pace:52, shooting:25, passing:18, defending:88,
+  { name:"Ashley Cole", nickname:"Shot a work experience kid with an air rifle", position:"Defender", suit:"♥", rank:12, rankLabel:"Q", tekkers:80, shithousery:70, madness:55, clutch:82, vibes:52,
+    ability:{ name:"Air Rifle", desc:"Snipe! Your Tekkers gets +15 and if you win, the opponent discards their next hand card.", type:"manual" }},
+  { name:"Nemanja Vidić", nickname:"Heading machine, zero fear", position:"Defender", suit:"♥", rank:11, rankLabel:"J", tekkers:65, shithousery:40, madness:45, clutch:92, vibes:60,
+    ability:{ name:"Zero Fear", desc:"Head it clear — your Clutch becomes 99 this round.", type:"manual" }},
+  { name:"Stuart Pearce", nickname:"Psycho", position:"Defender", suit:"♥", rank:10, rankLabel:"10", tekkers:58, shithousery:55, madness:82, clutch:85, vibes:75,
+    ability:{ name:"Psycho", desc:"Pure aggression — gain +20 Madness, but lose 15 Clutch.", type:"manual" }},
+  { name:"Vinnie Jones", nickname:"Grabbed Gazza by the balls, literally", position:"Defender", suit:"♥", rank:9, rankLabel:"9", tekkers:18, shithousery:95, madness:85, clutch:45, vibes:90,
     ability:{ name:"The Grab", desc:"Intimidation — opponent's best stat is reduced by 25 this round.", type:"manual" }},
-  { name:"Gary Neville", nickname:"Most annoying man in football", position:"Defender", suit:"♥", rank:8, rankLabel:"8", pace:62, shooting:22, passing:60, defending:82,
+  { name:"Gary Neville", nickname:"Most annoying man in football", position:"Defender", suit:"♥", rank:8, rankLabel:"8", tekkers:55, shithousery:65, madness:30, clutch:72, vibes:55,
     ability:{ name:"Pundit Mode", desc:"Analysis paralysis — peek at the CPU's chosen stat before you pick yours.", type:"manual" }},
-  { name:"Patrice Evra", nickname:"Raw chicken, I LOVE THIS GAME", position:"Defender", suit:"♥", rank:7, rankLabel:"7", pace:75, shooting:30, passing:65, defending:80,
+  { name:"Patrice Evra", nickname:"Raw chicken, I LOVE THIS GAME", position:"Defender", suit:"♥", rank:7, rankLabel:"7", tekkers:72, shithousery:35, madness:78, clutch:70, vibes:92,
     ability:{ name:"Raw Chicken", desc:"I LOVE THIS GAME — win or lose, you keep your card this round.", type:"manual" }},
-  { name:"Virgil van Dijk", nickname:"The Colossus", position:"Defender", suit:"♥", rank:6, rankLabel:"6", pace:70, shooting:35, passing:72, defending:92,
+  { name:"Virgil van Dijk", nickname:"The Colossus", position:"Defender", suit:"♥", rank:6, rankLabel:"6", tekkers:80, shithousery:15, madness:12, clutch:92, vibes:72,
     ability:{ name:"Colossus", desc:"Immovable object — if the stat difference is 15 or less, you win automatically.", type:"manual" }},
-  { name:"Jaap Stam", nickname:"Bald assassin, sold for writing a book", position:"Defender", suit:"♥", rank:5, rankLabel:"5", pace:65, shooting:20, passing:45, defending:90,
+  { name:"Jaap Stam", nickname:"Bald assassin, sold for writing a book", position:"Defender", suit:"♥", rank:5, rankLabel:"5", tekkers:60, shithousery:72, madness:40, clutch:88, vibes:65,
     ability:{ name:"The Stare", desc:"Lock eyes — the opponent's card is frozen (all stats drop by 12).", type:"manual" }},
-  { name:"Martin Keown", nickname:"That face snarling at van Nistelrooy", position:"Defender", suit:"♥", rank:4, rankLabel:"4", pace:58, shooting:15, passing:40, defending:84,
+  { name:"Martin Keown", nickname:"That face snarling at van Nistelrooy", position:"Defender", suit:"♥", rank:4, rankLabel:"4", tekkers:50, shithousery:88, madness:60, clutch:78, vibes:70,
     ability:{ name:"The Snarl", desc:"Get in their face — ties count as wins for you this round.", type:"manual" }},
-  { name:"Micah Richards", nickname:"Biggest laugh in punditry", position:"Defender", suit:"♥", rank:3, rankLabel:"3", pace:80, shooting:30, passing:48, defending:72,
-    ability:{ name:"Big Laugh", desc:"Infectious energy — your Pace becomes 95 this round.", type:"manual" }},
-  { name:"Titus Bramble", nickname:"Walking disaster, highlight reel of chaos", position:"Defender", suit:"♥", rank:2, rankLabel:"2", pace:55, shooting:12, passing:28, defending:52,
+  { name:"Micah Richards", nickname:"Biggest laugh in punditry", position:"Defender", suit:"♥", rank:3, rankLabel:"3", tekkers:55, shithousery:15, madness:35, clutch:45, vibes:95,
+    ability:{ name:"Big Laugh", desc:"Infectious energy — your Vibes becomes 99 this round.", type:"manual" }},
+  { name:"Titus Bramble", nickname:"Walking disaster, highlight reel of chaos", position:"Defender", suit:"♥", rank:2, rankLabel:"2", tekkers:22, shithousery:20, madness:82, clutch:12, vibes:78,
     ability:{ name:"Walking Disaster", desc:"Own goal! Lose this round automatically... but steal TWO cards from CPU's won pile.", type:"manual" }},
 
   // ♦ MIDFIELDERS
-  { name:"Paul Gascoigne", nickname:"The most talented and tragic", position:"Midfielder", suit:"♦", rank:14, rankLabel:"A", pace:78, shooting:82, passing:93, defending:30,
+  { name:"Paul Gascoigne", nickname:"The most talented and tragic", position:"Midfielder", suit:"♦", rank:14, rankLabel:"A", tekkers:95, shithousery:20, madness:92, clutch:75, vibes:95,
     ability:{ name:"Dentist's Chair", desc:"Celebrate early — gain +10 to all stats. If you lose anyway, opponent takes an extra card.", type:"manual" }},
-  { name:"David Beckham", nickname:"The brand, the free kicks", position:"Midfielder", suit:"♦", rank:13, rankLabel:"K", pace:68, shooting:86, passing:95, defending:35,
-    ability:{ name:"Free Kick", desc:"Bend it — your Shooting becomes 99 and Passing becomes 99 this round.", type:"manual" }},
-  { name:"Steven Gerrard", nickname:"He slipped", position:"Midfielder", suit:"♦", rank:12, rankLabel:"Q", pace:74, shooting:85, passing:88, defending:62,
+  { name:"David Beckham", nickname:"The brand, the free kicks", position:"Midfielder", suit:"♦", rank:13, rankLabel:"K", tekkers:92, shithousery:30, madness:25, clutch:88, vibes:95,
+    ability:{ name:"Free Kick", desc:"Bend it — your Tekkers becomes 99 and Clutch becomes 99 this round.", type:"manual" }},
+  { name:"Steven Gerrard", nickname:"He slipped", position:"Midfielder", suit:"♦", rank:12, rankLabel:"Q", tekkers:88, shithousery:25, madness:45, clutch:92, vibes:82,
     ability:{ name:"The Slip", desc:"90% chance: win the round outright. 10% chance: lose even if you're ahead.", type:"manual" }},
-  { name:"Frank Lampard", nickname:"Fat Frank to legend", position:"Midfielder", suit:"♦", rank:11, rankLabel:"J", pace:60, shooting:88, passing:82, defending:55,
-    ability:{ name:"Ghost Goal", desc:"Did it cross the line? Your Shooting becomes 95. If you lose, it 'didn't count' — draw instead.", type:"manual" }},
-  { name:"Roy Keane", nickname:"Would fight his own shadow", position:"Midfielder", suit:"♦", rank:10, rankLabel:"10", pace:70, shooting:65, passing:75, defending:82,
+  { name:"Frank Lampard", nickname:"Fat Frank to legend", position:"Midfielder", suit:"♦", rank:11, rankLabel:"J", tekkers:82, shithousery:15, madness:18, clutch:88, vibes:60,
+    ability:{ name:"Ghost Goal", desc:"Did it cross the line? Your Clutch becomes 95. If you lose, it 'didn't count' — draw instead.", type:"manual" }},
+  { name:"Roy Keane", nickname:"Would fight his own shadow", position:"Midfielder", suit:"♦", rank:10, rankLabel:"10", tekkers:72, shithousery:82, madness:78, clutch:85, vibes:75,
     ability:{ name:"Red Mist", desc:"Double your chosen stat. But if you lose, opponent takes an extra card from your pile.", type:"manual" }},
-  { name:"Patrick Vieira", nickname:"Tunnel wars with Keane", position:"Midfielder", suit:"♦", rank:9, rankLabel:"9", pace:72, shooting:62, passing:78, defending:80,
-    ability:{ name:"Tunnel Wars", desc:"Force a showdown — the round is decided by Defending only, regardless of what was picked.", type:"manual" }},
-  { name:"Paul Scholes", nickname:"Hit a tree from 40 yards, worst tackles ever", position:"Midfielder", suit:"♦", rank:8, rankLabel:"8", pace:52, shooting:82, passing:90, defending:45,
-    ability:{ name:"Tree Shot", desc:"Your Passing becomes 99. Also, randomly reduce one of the opponent's stats by 20 (bad tackle).", type:"manual" }},
-  { name:"Matt Le Tissier", nickname:"Genius who refused to leave Southampton", position:"Midfielder", suit:"♦", rank:7, rankLabel:"7", pace:45, shooting:88, passing:85, defending:20,
+  { name:"Patrick Vieira", nickname:"Tunnel wars with Keane", position:"Midfielder", suit:"♦", rank:9, rankLabel:"9", tekkers:78, shithousery:60, madness:45, clutch:82, vibes:68,
+    ability:{ name:"Tunnel Wars", desc:"Force a showdown — the round is decided by Clutch only, regardless of what was picked.", type:"manual" }},
+  { name:"Paul Scholes", nickname:"Hit a tree from 40 yards, worst tackles ever", position:"Midfielder", suit:"♦", rank:8, rankLabel:"8", tekkers:90, shithousery:55, madness:50, clutch:72, vibes:70,
+    ability:{ name:"Tree Shot", desc:"Your Tekkers becomes 99. Also, randomly reduce one of the opponent's stats by 20 (bad tackle).", type:"manual" }},
+  { name:"Matt Le Tissier", nickname:"Genius who refused to leave Southampton", position:"Midfielder", suit:"♦", rank:7, rankLabel:"7", tekkers:95, shithousery:10, madness:35, clutch:65, vibes:88,
     ability:{ name:"Loyalty", desc:"Stubborn genius — if you play Le Tiss on your home turf (your turn), +15 to all stats.", type:"manual" }},
-  { name:"Jack Grealish", nickname:"Tiny shin pads, calves, partying with the trophy", position:"Midfielder", suit:"♦", rank:6, rankLabel:"6", pace:76, shooting:68, passing:80, defending:32,
+  { name:"Jack Grealish", nickname:"Tiny shin pads, calves, partying with the trophy", position:"Midfielder", suit:"♦", rank:6, rankLabel:"6", tekkers:82, shithousery:55, madness:72, clutch:55, vibes:92,
     ability:{ name:"Tiny Shin Pads", desc:"Draw the foul — if you lose by 10 or less, it becomes a draw instead.", type:"manual" }},
-  { name:"Cole Palmer", nickname:"Cold Palmer, ice in his veins", position:"Midfielder", suit:"♦", rank:5, rankLabel:"5", pace:72, shooting:82, passing:78, defending:28,
+  { name:"Cole Palmer", nickname:"Cold Palmer, ice in his veins", position:"Midfielder", suit:"♦", rank:5, rankLabel:"5", tekkers:85, shithousery:45, madness:15, clutch:90, vibes:78,
     ability:{ name:"Cold Palmer", desc:"Ice cold — your stat cannot be affected by any opponent ability this round.", type:"manual" }},
-  { name:"Joey Barton", nickname:"Stubbed a cigar out on a teammate", position:"Midfielder", suit:"♦", rank:4, rankLabel:"4", pace:58, shooting:55, passing:62, defending:60,
+  { name:"Joey Barton", nickname:"Stubbed a cigar out on a teammate", position:"Midfielder", suit:"♦", rank:4, rankLabel:"4", tekkers:45, shithousery:92, madness:85, clutch:30, vibes:55,
     ability:{ name:"Cigar Burn", desc:"Dirty play — reduce opponent's highest stat by 30. But 25% chance you get sent off (auto-lose).", type:"manual" }},
-  { name:"Lee Bowyer", nickname:"Fought his own teammate on the pitch", position:"Midfielder", suit:"♦", rank:3, rankLabel:"3", pace:62, shooting:52, passing:55, defending:55,
+  { name:"Lee Bowyer", nickname:"Fought his own teammate on the pitch", position:"Midfielder", suit:"♦", rank:3, rankLabel:"3", tekkers:48, shithousery:70, madness:82, clutch:35, vibes:62,
     ability:{ name:"Friendly Fire", desc:"Chaos — swap one random stat between your card and the opponent's card.", type:"manual" }},
-  { name:"Kieron Dyer", nickname:"The teammate Bowyer fought", position:"Midfielder", suit:"♦", rank:2, rankLabel:"2", pace:78, shooting:42, passing:50, defending:35,
-    ability:{ name:"Glass Legs", desc:"Sprint! Pace becomes 95, but all other stats drop by 10.", type:"manual" }},
+  { name:"Kieron Dyer", nickname:"The teammate Bowyer fought", position:"Midfielder", suit:"♦", rank:2, rankLabel:"2", tekkers:52, shithousery:35, madness:72, clutch:22, vibes:48,
+    ability:{ name:"Glass Legs", desc:"Sprint! Tekkers becomes 95, but all other stats drop by 10.", type:"manual" }},
 
   // ♣ STRIKERS
-  { name:"Thierry Henry", nickname:"The King", position:"Striker", suit:"♣", rank:14, rankLabel:"A", pace:94, shooting:93, passing:82, defending:28,
+  { name:"Thierry Henry", nickname:"The King", position:"Striker", suit:"♣", rank:14, rankLabel:"A", tekkers:98, shithousery:25, madness:15, clutch:92, vibes:95,
     ability:{ name:"Va Va Voom", desc:"Pure class — gain +5 to all stats AND pick your stat after seeing the opponent's card.", type:"manual" }},
-  { name:"Alan Shearer", nickname:"The celebration, the punditry", position:"Striker", suit:"♣", rank:13, rankLabel:"K", pace:72, shooting:95, passing:62, defending:35,
-    ability:{ name:"The Celebration", desc:"One arm raised — Shooting becomes 99 and if you win, gain an extra card from CPU's pile.", type:"manual" }},
-  { name:"Wayne Rooney", nickname:"Granny gate, hair transplant, everything", position:"Striker", suit:"♣", rank:12, rankLabel:"Q", pace:80, shooting:90, passing:78, defending:42,
-    ability:{ name:"Overhead Kick", desc:"Spectacular! Win automatically if your Shooting is higher than their Defending.", type:"manual" }},
-  { name:"Eric Cantona", nickname:"Kung-fu kick, collar up, philosopher king", position:"Striker", suit:"♣", rank:11, rankLabel:"J", pace:65, shooting:85, passing:82, defending:30,
+  { name:"Alan Shearer", nickname:"The celebration, the punditry", position:"Striker", suit:"♣", rank:13, rankLabel:"K", tekkers:75, shithousery:40, madness:20, clutch:95, vibes:78,
+    ability:{ name:"The Celebration", desc:"One arm raised — Clutch becomes 99 and if you win, gain an extra card from CPU's pile.", type:"manual" }},
+  { name:"Wayne Rooney", nickname:"Granny gate, hair transplant, everything", position:"Striker", suit:"♣", rank:12, rankLabel:"Q", tekkers:85, shithousery:50, madness:72, clutch:88, vibes:82,
+    ability:{ name:"Overhead Kick", desc:"Spectacular! Win automatically if your Tekkers is higher than their Clutch.", type:"manual" }},
+  { name:"Eric Cantona", nickname:"Kung-fu kick, collar up, philosopher king", position:"Striker", suit:"♣", rank:11, rankLabel:"J", tekkers:90, shithousery:55, madness:88, clutch:78, vibes:95,
     ability:{ name:"Kung Fu Kick", desc:"Once per game — cancel a loss and replay the round with a new CPU card.", type:"manual" }},
-  { name:"Sergio Agüero", nickname:"AGUEROOOO", position:"Striker", suit:"♣", rank:10, rankLabel:"10", pace:82, shooting:92, passing:72, defending:22,
+  { name:"Sergio Agüero", nickname:"AGUEROOOO", position:"Striker", suit:"♣", rank:10, rankLabel:"10", tekkers:85, shithousery:15, madness:30, clutch:99, vibes:88,
     ability:{ name:"AGUEROOOO", desc:"Last-minute drama — if you're losing, 40% chance to win instead.", type:"manual" }},
-  { name:"Cristiano Ronaldo", nickname:"The ego, the talent, the SIUUU", position:"Striker", suit:"♣", rank:9, rankLabel:"9", pace:92, shooting:94, passing:72, defending:35,
+  { name:"Cristiano Ronaldo", nickname:"The ego, the talent, the SIUUU", position:"Striker", suit:"♣", rank:9, rankLabel:"9", tekkers:95, shithousery:45, madness:35, clutch:90, vibes:92,
     ability:{ name:"SIUUU", desc:"The ego — ALL your stats become 90 this round. You're just built different.", type:"manual" }},
-  { name:"Erling Haaland", nickname:"Viking terminator", position:"Striker", suit:"♣", rank:8, rankLabel:"8", pace:85, shooting:94, passing:55, defending:32,
+  { name:"Erling Haaland", nickname:"Viking terminator", position:"Striker", suit:"♣", rank:8, rankLabel:"8", tekkers:72, shithousery:20, madness:45, clutch:88, vibes:65,
     ability:{ name:"Viking Mode", desc:"Brute force — your highest stat gains +15. Simple. Effective.", type:"manual" }},
-  { name:"Mo Salah", nickname:"The Egyptian King", position:"Striker", suit:"♣", rank:7, rankLabel:"7", pace:92, shooting:88, passing:72, defending:30,
-    ability:{ name:"Cut Inside", desc:"Wrong-foot them — swap Pace and Shooting values, then gain +10 to whichever is now higher.", type:"manual" }},
-  { name:"Jamie Vardy", nickname:"Chat shit get banged, non-league to champion", position:"Striker", suit:"♣", rank:6, rankLabel:"6", pace:92, shooting:80, passing:55, defending:28,
-    ability:{ name:"Chat Shit", desc:"Get banged! Trash talk — opponent's stats all drop by 8. Pace becomes 99.", type:"manual" }},
-  { name:"Luis Suárez", nickname:"Biting, racism, genius", position:"Striker", suit:"♣", rank:5, rankLabel:"5", pace:78, shooting:90, passing:80, defending:38,
+  { name:"Mo Salah", nickname:"The Egyptian King", position:"Striker", suit:"♣", rank:7, rankLabel:"7", tekkers:90, shithousery:25, madness:22, clutch:85, vibes:82,
+    ability:{ name:"Cut Inside", desc:"Wrong-foot them — swap Tekkers and Shithousery values, then gain +10 to whichever is now higher.", type:"manual" }},
+  { name:"Jamie Vardy", nickname:"Chat shit get banged, non-league to champion", position:"Striker", suit:"♣", rank:6, rankLabel:"6", tekkers:62, shithousery:88, madness:72, clutch:82, vibes:90,
+    ability:{ name:"Chat Shit", desc:"Get banged! Trash talk — opponent's stats all drop by 8. Shithousery becomes 99.", type:"manual" }},
+  { name:"Luis Suárez", nickname:"Biting, racism, genius", position:"Striker", suit:"♣", rank:5, rankLabel:"5", tekkers:92, shithousery:95, madness:78, clutch:82, vibes:55,
     ability:{ name:"The Bite", desc:"Steal a card from the opponent's WON pile instead of playing the current round.", type:"manual" }},
-  { name:"Paolo Di Canio", nickname:"The push on the ref, the volley, the salute", position:"Striker", suit:"♣", rank:4, rankLabel:"4", pace:70, shooting:78, passing:68, defending:18,
-    ability:{ name:"The Volley", desc:"Spectacular technique — Shooting becomes 98 but Defending drops to 5.", type:"manual" }},
-  { name:"Mario Balotelli", nickname:"Why always me, fireworks in his bathroom", position:"Striker", suit:"♣", rank:3, rankLabel:"3", pace:72, shooting:78, passing:55, defending:20,
+  { name:"Paolo Di Canio", nickname:"The push on the ref, the volley, the salute", position:"Striker", suit:"♣", rank:4, rankLabel:"4", tekkers:85, shithousery:78, madness:88, clutch:55, vibes:82,
+    ability:{ name:"The Volley", desc:"Spectacular technique — Tekkers becomes 98 but Clutch drops to 5.", type:"manual" }},
+  { name:"Mario Balotelli", nickname:"Why always me, fireworks in his bathroom", position:"Striker", suit:"♣", rank:3, rankLabel:"3", tekkers:78, shithousery:55, madness:95, clutch:35, vibes:92,
     ability:{ name:"Why Always Me", desc:"Randomize which stat is used this round — nobody knows what's coming.", type:"manual" }},
-  { name:"Ali Dia", nickname:"Pretended to be George Weah's cousin. Legend.", position:"Striker", suit:"♣", rank:2, rankLabel:"2", pace:18, shooting:8, passing:12, defending:15,
+  { name:"Ali Dia", nickname:"Pretended to be George Weah's cousin. Legend.", position:"Striker", suit:"♣", rank:2, rankLabel:"2", tekkers:5, shithousery:92, madness:85, clutch:3, vibes:95,
     ability:{ name:"The Con", desc:"Bluff any one stat as 99 — opponent can call your bluff. If they don't call it, you win. If they do, you auto-lose.", type:"manual" }},
 ];
 
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════
-const STATS = ['pace','shooting','passing','defending'];
-const STAT_ICONS = { pace:'🏃', shooting:'⚽', passing:'🎯', defending:'🛡️' };
+const STATS = ['tekkers','shithousery','madness','clutch','vibes'];
+const STAT_ICONS = { tekkers:'🎩', shithousery:'😈', madness:'🔥', clutch:'🎯', vibes:'✨' };
 const POS_CLASS = { Goalkeeper:'pos-gk', Defender:'pos-def', Midfielder:'pos-mid', Striker:'pos-str' };
 const POS_COLOR = { Goalkeeper:'var(--gk)', Defender:'var(--def)', Midfielder:'var(--mid)', Striker:'var(--str)' };
 
@@ -2664,7 +2666,7 @@ function cpuPickBestStat() {
     return STATS[Math.floor(Math.random() * STATS.length)];
   }
 
-  let bestStat = 'pace', bestVal = 0;
+  let bestStat = 'tekkers', bestVal = 0;
   STATS.forEach(s => {
     let v = getStat(state.cpuCard, s, state.roundStats.cpu);
     // At diff 2, also consider the *gap* vs player card (if visible)
@@ -2724,8 +2726,8 @@ async function showHalftime() {
   twistEl.innerHTML = `
     <div style="margin-bottom:0.5rem">Choose your second-half tactic:</div>
     <div style="display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center; margin-top:0.8rem">
-      <button class="btn-deal" onclick="pickHalftimeTactic('attack')" style="font-size:0.85rem; padding:0.6rem 1.5rem; border-color:#e74c3c; color:#e74c3c">⚔️ Attack<br><span style="font-size:0.55rem;color:#888;-webkit-text-fill-color:#888">+5 Shooting & Pace<br>−3 Defending</span></button>
-      <button class="btn-deal" onclick="pickHalftimeTactic('defend')" style="font-size:0.85rem; padding:0.6rem 1.5rem; border-color:#4a90d9; color:#4a90d9">🛡️ Defend<br><span style="font-size:0.55rem;color:#888;-webkit-text-fill-color:#888">+5 Defending & Passing<br>−3 Pace</span></button>
+      <button class="btn-deal" onclick="pickHalftimeTactic('attack')" style="font-size:0.85rem; padding:0.6rem 1.5rem; border-color:#e74c3c; color:#e74c3c">⚔️ Attack<br><span style="font-size:0.55rem;color:#888;-webkit-text-fill-color:#888">+5 Shithousery & Madness<br>−3 Clutch</span></button>
+      <button class="btn-deal" onclick="pickHalftimeTactic('defend')" style="font-size:0.85rem; padding:0.6rem 1.5rem; border-color:#4a90d9; color:#4a90d9">🛡️ Defend<br><span style="font-size:0.55rem;color:#888;-webkit-text-fill-color:#888">+5 Clutch & Tekkers<br>−3 Madness</span></button>
       <button class="btn-deal" onclick="pickHalftimeTactic('balanced')" style="font-size:0.85rem; padding:0.6rem 1.5rem; border-color:var(--gold); color:var(--gold)">⚖️ Balanced<br><span style="font-size:0.55rem;color:#888;-webkit-text-fill-color:#888">+2 All Stats<br>+1 Energy</span></button>
     </div>
   `;
@@ -2747,10 +2749,10 @@ function pickHalftimeTactic(tactic) {
   let msg = '';
   switch(tactic) {
     case 'attack':
-      msg = '⚔️ ATTACK MODE — Shooting & Pace boosted!';
+      msg = '⚔️ ATTACK MODE — Shithousery & Madness boosted!';
       break;
     case 'defend':
-      msg = '🛡️ DEFENSIVE MODE — Defending & Passing boosted!';
+      msg = '🛡️ DEFENSIVE MODE — Clutch & Tekkers boosted!';
       break;
     case 'balanced':
       msg = '⚖️ BALANCED — All stats +2, +1 Energy!';
@@ -2780,14 +2782,14 @@ function applyHalftimeTactic(card, mods) {
   if (!state.halftimeTactic || !card) return;
   switch(state.halftimeTactic) {
     case 'attack':
-      mods.shooting = (mods.shooting !== undefined ? mods.shooting : card.shooting) + 5;
-      mods.pace = (mods.pace !== undefined ? mods.pace : card.pace) + 5;
-      mods.defending = (mods.defending !== undefined ? mods.defending : card.defending) - 3;
+      mods.shithousery = (mods.shithousery !== undefined ? mods.shithousery : card.shithousery) + 5;
+      mods.madness = (mods.madness !== undefined ? mods.madness : card.madness) + 5;
+      mods.clutch = (mods.clutch !== undefined ? mods.clutch : card.clutch) - 3;
       break;
     case 'defend':
-      mods.defending = (mods.defending !== undefined ? mods.defending : card.defending) + 5;
-      mods.passing = (mods.passing !== undefined ? mods.passing : card.passing) + 5;
-      mods.pace = (mods.pace !== undefined ? mods.pace : card.pace) - 3;
+      mods.clutch = (mods.clutch !== undefined ? mods.clutch : card.clutch) + 5;
+      mods.tekkers = (mods.tekkers !== undefined ? mods.tekkers : card.tekkers) + 5;
+      mods.madness = (mods.madness !== undefined ? mods.madness : card.madness) - 3;
       break;
     case 'balanced':
       STATS.forEach(s => { mods[s] = (mods[s] !== undefined ? mods[s] : card[s]) + 2; });
@@ -3017,10 +3019,11 @@ function renderDraftPool() {
       <div style="font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;text-transform:uppercase;text-align:center;line-height:1.2">${card.name}</div>
       <div style="font-size:0.65rem;color:#999;font-style:italic;text-align:center;margin:0.2rem 0;line-height:1.2">${card.nickname || ''}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem 0.8rem;margin-top:0.4rem;font-size:0.75rem;color:#aaa">
-        <span>⚡ Pace <b style="color:#fff">${card.pace}</b></span>
-        <span>🎯 Shot <b style="color:#fff">${card.shooting}</b></span>
-        <span>🎯 Pass <b style="color:#fff">${card.passing}</b></span>
-        <span>🛡 Def <b style="color:#fff">${card.defending}</b></span>
+        <span>🎩 Tek <b style="color:#fff">${card.tekkers}</b></span>
+        <span>😈 Shit <b style="color:#fff">${card.shithousery}</b></span>
+        <span>🔥 Mad <b style="color:#fff">${card.madness}</b></span>
+        <span>🎯 Clu <b style="color:#fff">${card.clutch}</b></span>
+        <span>✨ Vib <b style="color:#fff">${card.vibes}</b></span>
       </div>
       <div style="font-size:0.65rem;color:${color};margin-top:0.3rem;text-align:center" title="${card.ability.desc}">⚡ ${card.ability.name}</div>`;
     if (!picked && draftState.isPlayerTurn) {
@@ -3158,7 +3161,7 @@ function renderTradeCards() {
     const color = POS_COLOR[card.position] || '#888';
     const selected = tradeState.wonIdx === realIdx;
     div.style.cssText = `padding:0.35rem 0.6rem;border:1px solid ${selected ? 'var(--gold)' : color};border-radius:3px;font-size:0.6rem;color:${selected ? 'var(--gold)' : color};font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;background:${selected ? 'rgba(212,175,55,0.1)' : 'transparent'};transition:all 0.2s`;
-    div.innerHTML = `${card.name.split(' ').pop()}<br><span style="font-size:0.45rem;color:#666">${card.position} — ⚡${card.pace} 🎯${card.shooting} 📐${card.passing} 🛡${card.defending}</span>`;
+    div.innerHTML = `${card.name.split(' ').pop()}<br><span style="font-size:0.45rem;color:#666">${card.position} — 🎩${card.tekkers} 😈${card.shithousery} 🔥${card.madness} 🎯${card.clutch} ✨${card.vibes}</span>`;
     div.onclick = () => selectTradeWon(realIdx);
     wonEl.appendChild(div);
   });
@@ -3650,17 +3653,17 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Long Bomb':
-      pm.shooting = 92;
+      pm.shithousery = 92;
       break;
 
     case 'Name Power':
-      { let best = 'pace', bv = 0;
+      { let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((pm[s] || p[s]) > bv) { bv = pm[s] || p[s]; best = s; } });
         pm[best] = (pm[best] || p[best]) + 15; }
       break;
 
     case 'Goal Kick':
-      pm.shooting = 85;
+      pm.shithousery = 85;
       break;
 
     case 'Twitter Rant':
@@ -3688,22 +3691,22 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Air Rifle':
-      pm.pace = (pm.pace || p.pace) + 15;
+      pm.tekkers = (pm.tekkers || p.tekkers) + 15;
       state.abilityActive = { type: 'discard-on-win' };
       break;
 
     case 'Zero Fear':
-      pm.defending = 99;
+      pm.clutch = 99;
       break;
 
     case 'Psycho':
-      pm.shooting = (pm.shooting || p.shooting) + 20;
-      pm.defending = (pm.defending || p.defending) - 15;
+      pm.madness = (pm.madness || p.madness) + 20;
+      pm.clutch = (pm.clutch || p.clutch) - 15;
       break;
 
     case 'The Grab':
       if (state.cpuCard) {
-        let best = 'pace', bv = 0;
+        let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((cm[s] || state.cpuCard[s]) > bv) { bv = cm[s] || state.cpuCard[s]; best = s; } });
         cm[best] = (cm[best] || state.cpuCard[best]) - 25;
       }
@@ -3732,7 +3735,7 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Big Laugh':
-      pm.pace = 95;
+      pm.vibes = 99;
       break;
 
     case 'Walking Disaster':
@@ -3745,8 +3748,8 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Free Kick':
-      pm.shooting = 99;
-      pm.passing = 99;
+      pm.tekkers = 99;
+      pm.clutch = 99;
       break;
 
     case 'The Slip':
@@ -3754,7 +3757,7 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Ghost Goal':
-      pm.shooting = 95;
+      pm.clutch = 95;
       state.abilityActive = { type: 'ghost-goal' };
       break;
 
@@ -3763,11 +3766,11 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Tunnel Wars':
-      state.abilityActive = { type: 'force-stat', stat: 'defending' };
+      state.abilityActive = { type: 'force-stat', stat: 'clutch' };
       break;
 
     case 'Tree Shot':
-      pm.passing = 99;
+      pm.tekkers = 99;
       if (state.cpuCard) {
         const rs = STATS[Math.floor(Math.random() * STATS.length)];
         cm[rs] = (cm[rs] || state.cpuCard[rs]) - 20;
@@ -3809,8 +3812,8 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Glass Legs':
-      pm.pace = 95;
-      ['shooting','passing','defending'].forEach(s => { pm[s] = (pm[s] || p[s]) - 10; });
+      pm.tekkers = 95;
+      ['shithousery','madness','clutch','vibes'].forEach(s => { pm[s] = (pm[s] || p[s]) - 10; });
       break;
 
     case 'Va Va Voom':
@@ -3819,7 +3822,7 @@ async function activateAbility(auto = false) {
       break;
 
     case 'The Celebration':
-      pm.shooting = 99;
+      pm.clutch = 99;
       state.abilityActive = { type: 'extra-win-card' };
       break;
 
@@ -3841,20 +3844,20 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Viking Mode':
-      { let best = 'pace', bv = 0;
+      { let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((pm[s] || p[s]) > bv) { bv = pm[s] || p[s]; best = s; } });
         pm[best] = (pm[best] || p[best]) + 15; }
       break;
 
     case 'Cut Inside':
-      { let pa = pm.pace || p.pace, sh = pm.shooting || p.shooting;
-        pm.pace = sh; pm.shooting = pa;
-        let higher = pm.pace > pm.shooting ? 'pace' : 'shooting';
+      { let tk = pm.tekkers || p.tekkers, sh = pm.shithousery || p.shithousery;
+        pm.tekkers = sh; pm.shithousery = tk;
+        let higher = pm.tekkers > pm.shithousery ? 'tekkers' : 'shithousery';
         pm[higher] += 10; }
       break;
 
     case 'Chat Shit':
-      pm.pace = 99;
+      pm.shithousery = 99;
       if (state.cpuCard) {
         STATS.forEach(s => { cm[s] = (cm[s] || state.cpuCard[s]) - 8; });
       }
@@ -3865,8 +3868,8 @@ async function activateAbility(auto = false) {
       break;
 
     case 'The Volley':
-      pm.shooting = 98;
-      pm.defending = 5;
+      pm.tekkers = 98;
+      pm.clutch = 5;
       break;
 
     case 'Why Always Me':
@@ -3917,13 +3920,13 @@ async function applyCPUAbility() {
       }
       break;
     case 'Zero Fear':
-      cm.defending = 99; break;
+      cm.clutch = 99; break;
     case 'Free Kick':
-      cm.shooting = 99; cm.passing = 99; break;
+      cm.tekkers = 99; cm.clutch = 99; break;
     case 'SIUUU':
       STATS.forEach(s => { cm[s] = 90; }); break;
     case 'Viking Mode':
-      { let best = 'pace', bv = 0;
+      { let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((cm[s] || c[s]) > bv) { bv = cm[s] || c[s]; best = s; } });
         cm[best] = (cm[best] || c[best]) + 15; }
       break;
@@ -3931,7 +3934,7 @@ async function applyCPUAbility() {
       if (state.playerCard && (!state.abilityActive || state.abilityActive.type !== 'immune')) {
         if (!state.roundStats.player) state.roundStats.player = {};
         const pm = state.roundStats.player;
-        let best = 'pace', bv = 0;
+        let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((pm[s] || state.playerCard[s]) > bv) { bv = pm[s] || state.playerCard[s]; best = s; } });
         pm[best] = (pm[best] || state.playerCard[best]) - 25;
       }
@@ -3944,20 +3947,20 @@ async function applyCPUAbility() {
       }
       break;
     case 'Chat Shit':
-      cm.pace = 99;
+      cm.shithousery = 99;
       if (state.playerCard && (!state.abilityActive || state.abilityActive.type !== 'immune')) {
         if (!state.roundStats.player) state.roundStats.player = {};
         STATS.forEach(s => { state.roundStats.player[s] = (state.roundStats.player[s] || state.playerCard[s]) - 8; });
       }
       break;
     case 'Big Laugh':
-      cm.pace = 95; break;
+      cm.vibes = 99; break;
     case 'Psycho':
-      cm.shooting = (cm.shooting || c.shooting) + 20;
-      cm.defending = (cm.defending || c.defending) - 15;
+      cm.madness = (cm.madness || c.madness) + 20;
+      cm.clutch = (cm.clutch || c.clutch) - 15;
       break;
     case 'Long Bomb':
-      cm.shooting = 92; break;
+      cm.shithousery = 92; break;
     // Other CPU abilities just get a visual flash but no mechanical effect (keeps it fair)
   }
 
@@ -4141,9 +4144,9 @@ async function resolveRound(stat) {
 
   // Handle Overhead Kick (Rooney)
   if (aa && aa.type === 'overhead-kick') {
-    const pShoot = getStat(state.playerCard, 'shooting', pm);
-    const cDef = getStat(state.cpuCard, 'defending', cm);
-    if (pShoot > cDef) {
+    const pTekkers = getStat(state.playerCard, 'tekkers', pm);
+    const cClutch = getStat(state.cpuCard, 'clutch', cm);
+    if (pTekkers > cClutch) {
       showBanner('OVERHEAD KICK!', 'win');
       screenShake(); screenFlash('gold', 500);
       await delay(1000);
