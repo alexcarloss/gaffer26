@@ -2633,37 +2633,24 @@ function updateCPUDifficulty() {
 }
 
 function cpuPickBestCard() {
-  // Score cards by versatility (avg of top 2 stats) not just single max stat.
-  // This prevents the CPU always leading with defenders/GKs who have one huge defending stat.
-  const diff = state.cpuDifficulty;
-  const smartChance = diff === 0 ? 0.7 : diff === 1 ? 0.85 : 0.95;
+  // CPU picks randomly from hand — no position bias
+  // Small bonus to avoid repeating the same position as last round
+  const scored = state.cpuHand.map((c, i) => {
+    let score = Math.random() * 10;
+    // Avoid playing same position as last round
+    if (state.lastCpuPosition && c.position === state.lastCpuPosition) {
+      score -= 3;
+    }
+    return { i, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
 
-  if (Math.random() < smartChance) {
-    const scored = state.cpuHand.map((c, i) => {
-      const stats = [c.pace, c.shooting, c.passing, c.defending].sort((a,b) => b-a);
-      let score;
-      if (diff === 0) {
-        // Versatility: top 2 stats averaged
-        score = stats[0] * 0.5 + stats[1] * 0.5;
-      } else if (diff === 1) {
-        // Top 2 weighted
-        score = stats[0] * 0.55 + stats[1] * 0.35 + stats[2] * 0.1;
-      } else {
-        // Diff 2: top 3 weighted for maximum versatility
-        score = stats[0] * 0.45 + stats[1] * 0.35 + stats[2] * 0.2;
-      }
-      // Avoid playing same position as last round (variety bonus)
-      if (state.lastCpuPosition && c.position !== state.lastCpuPosition) {
-        score += 3;
-      }
-      // Small random jitter to break ties and add unpredictability
-      score += Math.random() * 4;
-      return { i, score };
-    });
-    scored.sort((a, b) => b.score - a.score);
-    return scored[0].i;
+  // Occasionally pick fully random (30% chance) to keep it unpredictable
+  if (Math.random() < 0.3) {
+    return Math.floor(Math.random() * state.cpuHand.length);
   }
-  return Math.floor(Math.random() * state.cpuHand.length);
+
+  return scored[0].i;
 }
 
 function cpuPickBestStat() {
