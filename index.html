@@ -110,7 +110,8 @@ body {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   cursor: pointer; text-align: center;
-  overflow: hidden;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 2rem 0;
 }
 #splash-overlay canvas {
   position: absolute; inset: 0;
@@ -1499,12 +1500,40 @@ body.shake { animation: shake 0.5s ease; }
 </head>
 <body>
 
-<!-- TITLE SPLASH -->
+<!-- SINGLE TITLE SCREEN -->
 <div id="splash-overlay">
   <canvas id="particle-canvas"></canvas>
   <div class="gate-presents">ACFC present</div>
   <div class="gate-title">GAFFER<sup>26</sup></div>
   <div class="gate-tap">Tap to begin</div>
+  <div id="gate-menu" style="display:none; position:relative; z-index:2; opacity:0; transition: opacity 0.8s ease; width:100%; max-width:450px; padding:0 1.5rem">
+    <div style="margin-top:0.5rem; background:rgba(212,175,55,0.06); border:2px solid rgba(212,175,55,0.2); border-radius:12px; padding:1rem 1.2rem; text-align:left">
+      <div style="font-family:'Oswald',sans-serif; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:0.5rem; text-align:center">How to Play</div>
+      <div style="font-size:0.8rem; color:#bbb; line-height:1.7">
+        <div style="margin-bottom:0.4rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">1.</span><span>Draft your squad — pick 5 legends from the pool</span></div>
+        <div style="margin-bottom:0.4rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">2.</span><span>Play a card, then choose your strongest stat</span></div>
+        <div style="margin-bottom:0.4rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">3.</span><span>Win the round — highest stat wins the cards!</span></div>
+      </div>
+      <div style="margin-top:0.6rem; background:rgba(212,175,55,0.1); border:2px solid var(--gold); border-radius:8px; padding:0.6rem 0.8rem; text-align:center; animation:spCallout 1.5s ease infinite">
+        <div style="font-family:'Oswald',sans-serif; font-size:0.9rem; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.2rem">SUPERPOWER</div>
+        <div style="font-size:0.75rem; color:#ddd; line-height:1.4">Every card has a <strong style="color:var(--gold)">unique superpower</strong> — tap the <strong style="color:#fff">glowing button</strong> to unleash it!</div>
+        <div style="font-size:0.7rem; color:#e74c3c; font-weight:600; margin-top:0.3rem">Only 3 per game — choose your moment!</div>
+      </div>
+    </div>
+    <div style="margin-top:1rem; display:flex; flex-direction:column; align-items:center; gap:0.5rem">
+      <label style="font-family:'Oswald',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#555">Enter Your Name</label>
+      <input type="text" id="gate-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.1rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:200px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
+    </div>
+    <div style="display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center; margin-top:1rem">
+      <button class="btn-deal" onclick="startFromGate('cpu')" style="font-size:1rem; padding:0.7rem 2rem; margin-top:0">Full Match</button>
+      <button class="btn-deal" onclick="startFromGate('quick')" style="font-size:1rem; padding:0.7rem 2rem; margin-top:0; border-color:#f39c12; color:#f39c12">Quick Play</button>
+      <button class="btn-deal" onclick="startFromGate('draft')" style="font-size:1rem; padding:0.7rem 2rem; margin-top:0; border-color:#2ecc71; color:#2ecc71">Draft Mode</button>
+    </div>
+    <div style="display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center; margin-top:0.6rem">
+      <button class="btn-deal" style="font-size:0.8rem; padding:0.4rem 1.5rem; margin-top:0; opacity:0.6" onclick="showPvPSetup()">vs Player</button>
+      <button class="btn-deal" style="font-size:0.8rem; padding:0.4rem 1.5rem; margin-top:0; opacity:0.6" onclick="showLeaderboard()">Leaderboard</button>
+    </div>
+  </div>
 </div>
 
 <!-- DRAFT SCREEN -->
@@ -1554,38 +1583,8 @@ body.shake { animation: shake 0.5s ease; }
   </div>
 </div>
 
-<!-- TITLE SCREEN -->
-<div id="title-screen" style="display:none">
-  <h1 class="ts-anim">GAFFER<span style="font-size:0.6em; vertical-align:super">26</span></h1>
-  <div class="subtitle ts-anim">52 Premier League Legends</div>
-  <div class="tagline ts-anim">Draft your legends. Deploy superpowers. Become the gaffer.</div>
-  <div class="ts-anim" style="margin-top:1.2rem; background:rgba(212,175,55,0.08); border:2px solid rgba(212,175,55,0.25); border-radius:12px; padding:1.2rem 1.5rem; max-width:420px; text-align:left">
-    <div style="font-family:'Oswald',sans-serif; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:0.7rem; text-align:center">How to Play</div>
-    <div style="font-size:0.85rem; color:#bbb; line-height:1.8">
-      <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.1rem; min-width:1.5rem">1.</span><span>Draft your squad — pick 5 legends from the pool</span></div>
-      <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.1rem; min-width:1.5rem">2.</span><span>Play a card, then choose your strongest stat</span></div>
-      <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.1rem; min-width:1.5rem">3.</span><span>Win the round — highest stat wins the cards!</span></div>
-    </div>
-    <div style="margin-top:0.8rem; background:rgba(212,175,55,0.12); border:2px solid var(--gold); border-radius:8px; padding:0.8rem 1rem; text-align:center; animation:spCallout 1.5s ease infinite">
-      <div style="font-family:'Oswald',sans-serif; font-size:1rem; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.3rem">SUPERPOWER</div>
-      <div style="font-size:0.8rem; color:#ddd; line-height:1.5">Every card has a <strong style="color:var(--gold)">unique superpower</strong> — a game-changing ability!<br>When the <strong style="color:#fff">big glowing button</strong> appears, <strong style="color:var(--gold)">TAP IT</strong> to unleash chaos.</div>
-      <div style="font-size:0.75rem; color:#e74c3c; font-weight:600; margin-top:0.4rem">Only 3 per game — choose your moment!</div>
-    </div>
-  </div>
-  <div id="name-entry" class="ts-anim" style="margin-top:1.2rem; display:flex; flex-direction:column; align-items:center; gap:0.6rem">
-    <label style="font-family:'Oswald',sans-serif; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.2em; color:#666">Enter Your Name</label>
-    <input type="text" id="player-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.2rem; padding:0.6rem 1.5rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:220px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
-  </div>
-  <div class="ts-anim" style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:1.5rem">
-    <button class="btn-deal" onclick="startGameWithName('cpu')">Full Match</button>
-    <button class="btn-deal" onclick="startGameWithName('quick')" style="border-color:#f39c12; color:#f39c12">Quick Play</button>
-    <button class="btn-deal" onclick="startGameWithName('draft')" style="border-color:#2ecc71; color:#2ecc71">Draft Mode</button>
-  </div>
-  <div class="ts-anim-fade" style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:0.8rem">
-    <button class="btn-deal" style="font-size:0.85rem; padding:0.5rem 1.8rem; opacity:0.6" onclick="showPvPSetup()">vs Player</button>
-    <button class="btn-deal" style="font-size:0.85rem; padding:0.5rem 1.8rem; opacity:0.6" onclick="showLeaderboard()">Leaderboard</button>
-  </div>
-</div>
+<!-- title-screen kept as hidden anchor for goHome/PvP refs -->
+<div id="title-screen" style="display:none"></div>
 
 <!-- PvP SETUP SCREEN -->
 <div id="pvp-screen" style="display:none; position:fixed; inset:0; z-index:250; background:rgba(5,5,10,0.98); flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem">
@@ -1831,26 +1830,44 @@ function removeInteractionListeners() {
   document.removeEventListener('pointerdown', startMusicOnInteraction);
 }
 
-// ── SPLASH → TITLE FLOW ──
-// Splash overlay handles the browser autoplay restriction:
-// user taps → music starts → splash fades → title animates in
+// ── SPLASH → MENU FLOW ──
+// Single screen: splash shows ACFC present GAFFER26 with particles
+// Tap reveals menu (how-to-play, name, buttons) on same screen
 
 function revealTitleScreen(animate) {
-  const ts = document.getElementById('title-screen');
-  ts.style.display = 'flex';
+  // For goHome and PvP disconnect — show the splash with menu
+  const splash = document.getElementById('splash-overlay');
+  splash.style.display = 'flex';
+  splash.style.opacity = '1';
   document.getElementById('volume-control').style.display = 'flex';
-  const ni = document.getElementById('player-name-input');
+  showGateMenu();
+}
+
+function showGateMenu() {
+  const menu = document.getElementById('gate-menu');
+  const ni = document.getElementById('gate-name-input');
   if (playerName) ni.value = playerName;
-  if (animate) {
-    // Stagger animations on each .ts-anim element
-    const items = ts.querySelectorAll('.ts-anim, .ts-anim-logo, .ts-anim-fade');
-    items.forEach((el, i) => {
-      setTimeout(() => el.classList.add('ts-visible'), 100 + i * 120);
-    });
-  } else {
-    // Skip animation — make everything visible instantly
-    ts.querySelectorAll('.ts-anim, .ts-anim-logo, .ts-anim-fade').forEach(el => el.classList.add('ts-visible'));
-  }
+  menu.style.display = 'block';
+  requestAnimationFrame(() => { menu.style.opacity = '1'; });
+  // Shrink title text to make room for menu
+  const title = document.querySelector('.gate-title');
+  const presents = document.querySelector('.gate-presents');
+  title.style.transition = 'font-size 0.6s ease, margin 0.6s ease';
+  title.style.fontSize = 'clamp(2.5rem, 8vw, 4.5rem)';
+  title.style.marginTop = '0';
+  presents.style.transition = 'font-size 0.6s ease';
+  presents.style.fontSize = 'clamp(0.7rem, 2vw, 1rem)';
+  // Hide tap text
+  const tap = document.querySelector('.gate-tap');
+  if (tap) tap.style.display = 'none';
+}
+
+function startFromGate(mode) {
+  const ni = document.getElementById('gate-name-input');
+  playerName = ni.value.trim() || 'THE GAFFER';
+  localStorage.setItem('gaffer26-name', playerName);
+  gameMode = mode;
+  startGame();
 }
 
 // ── GOLDEN PARTICLE SYSTEM ──
@@ -1869,24 +1886,24 @@ function revealTitleScreen(animate) {
   window.addEventListener('resize', resize);
 
   function createParticle() {
-    const isGold = Math.random() > 0.15;
+    const isGold = Math.random() > 0.1; // 90% gold for richer fairydust
     return {
       x: Math.random() * canvas.width,
       y: canvas.height + 10,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: -(Math.random() * 1.2 + 0.4),
-      size: Math.random() * 3 + (isGold ? 1 : 0.3),
-      alpha: Math.random() * 0.7 + 0.2,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: -(Math.random() * 1.5 + 0.3),
+      size: Math.random() * 4 + (isGold ? 1.2 : 0.4),
+      alpha: Math.random() * 0.8 + 0.2,
       life: 1,
-      decay: Math.random() * 0.002 + 0.0008,
+      decay: Math.random() * 0.0015 + 0.0005,
       gold: isGold,
       shimmer: Math.random() * Math.PI * 2,
-      drift: (Math.random() - 0.5) * 0.02
+      drift: (Math.random() - 0.5) * 0.025
     };
   }
 
-  // Seed initial particles — dense cloud
-  for (let i = 0; i < 150; i++) {
+  // Seed initial particles — dense cloud of fairydust
+  for (let i = 0; i < 250; i++) {
     const p = createParticle();
     p.y = Math.random() * canvas.height;
     p.life = Math.random();
@@ -1896,7 +1913,7 @@ function revealTitleScreen(animate) {
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // Spawn more particles for dense fairydust
-    while (particles.length < 200) particles.push(createParticle());
+    while (particles.length < 350) particles.push(createParticle());
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.x += p.vx + Math.sin(p.shimmer) * 0.3;
@@ -1934,38 +1951,29 @@ function revealTitleScreen(animate) {
 (function initSplash() {
   const splash = document.getElementById('splash-overlay');
 
-  // Returning visitor this session — skip everything
+  // Returning visitor this session — skip to menu
   if (sessionStorage.getItem('gaffer26-intro-seen')) {
-    splash.style.display = 'none';
-    if (window._stopParticles) window._stopParticles();
-    revealTitleScreen(false);
+    document.getElementById('volume-control').style.display = 'flex';
+    showGateMenu();
     ensureMusic();
     return;
   }
 
-  function dismissSplash() {
-    splash.removeEventListener('click', dismissSplash);
-    splash.removeEventListener('touchstart', dismissSplash);
+  function revealMenu() {
+    splash.removeEventListener('click', revealMenu);
+    splash.removeEventListener('touchstart', revealMenu);
     ensureMusic(); // User gesture — music starts reliably
     sessionStorage.setItem('gaffer26-intro-seen', '1');
-
-    // Fade out splash, go straight to title screen
-    splash.style.transition = 'opacity 0.8s ease';
-    splash.style.opacity = '0';
-
-    setTimeout(() => {
-      splash.style.display = 'none';
-      if (window._stopParticles) window._stopParticles();
-      revealTitleScreen(true);
-    }, 800);
+    document.getElementById('volume-control').style.display = 'flex';
+    showGateMenu();
   }
 
-  splash.addEventListener('click', dismissSplash);
-  splash.addEventListener('touchstart', dismissSplash);
+  splash.addEventListener('click', revealMenu);
+  splash.addEventListener('touchstart', revealMenu);
 
-  // Failsafe: auto-dismiss after 10s
+  // Failsafe: auto-reveal menu after 10s
   setTimeout(() => {
-    if (splash.style.display !== 'none') dismissSplash();
+    if (!document.getElementById('gate-menu').style.display || document.getElementById('gate-menu').style.display === 'none') revealMenu();
   }, 10000);
 })();
 
@@ -1980,15 +1988,28 @@ function goHome() {
   document.getElementById('leaderboard-screen').style.display = 'none';
   document.getElementById('pvp-screen').style.display = 'none';
   document.getElementById('exit-btn').style.display = 'none';
-  // Show title (no animation on return, everything already visible)
-  revealTitleScreen(false);
+  // Show splash with menu (particles restart if needed)
+  const splash = document.getElementById('splash-overlay');
+  splash.style.display = 'flex';
+  splash.style.opacity = '1';
+  document.getElementById('volume-control').style.display = 'flex';
+  showGateMenu();
+  // Restart particles if they were stopped
+  if (!window._particlesRunning) {
+    // Re-init particles by reloading the canvas
+    const canvas = document.getElementById('particle-canvas');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
   // Switch back to intro music on title screen
   if (musicPlaying) { playIntroMusic(); } else { musicStarted = false; musicConfirmed = false; ensureMusic(); }
 }
 
 function startGameWithName(mode) {
-  const ni = document.getElementById('player-name-input');
-  playerName = ni.value.trim() || 'THE GAFFER';
+  const ni = document.getElementById('gate-name-input');
+  playerName = (ni ? ni.value.trim() : '') || 'THE GAFFER';
   localStorage.setItem('gaffer26-name', playerName);
   gameMode = mode;
   startGame();
@@ -2091,7 +2112,7 @@ function setupPeerConnection(conn) {
   conn.on('close', () => {
     if (state.phase !== 'gameover') {
       alert('Opponent disconnected');
-      document.getElementById('title-screen').style.display = 'flex';
+      goHome();
       document.getElementById('game-screen').style.display = 'none';
     }
   });
@@ -3175,6 +3196,9 @@ function skipTrade() {
 // GAME FLOW
 // ═══════════════════════════════════════════════════════════
 function startGame() {
+  // Hide the splash/title overlay and stop particles
+  document.getElementById('splash-overlay').style.display = 'none';
+  if (window._stopParticles) window._stopParticles();
   document.getElementById('title-screen').style.display = 'none';
   document.getElementById('game-over').style.display = 'none';
   document.getElementById('leaderboard-screen').style.display = 'none';
