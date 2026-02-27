@@ -1769,30 +1769,36 @@ const audioCache = {};
 
 // ── Start music IMMEDIATELY — aggressive autoplay with instant fallback ──
 let musicStarted = false;
+
 function ensureMusic() {
   if (musicStarted) return;
   musicStarted = true;
-  initMusic();
-}
-
-// Try to autoplay music immediately (before user interaction)
-function tryAutoplayMusic() {
-  if (musicStarted) return;
-  // Preload all tracks
-  preloadTracks();
-  // Try playing the intro track directly
-  const introAudio = audioCache[MUSIC_TRACKS.intro] || new Audio(MUSIC_TRACKS.intro);
-  introAudio.volume = 0.6;
-  introAudio.loop = true;
-  const p = introAudio.play();
+  // Play intro track DIRECTLY first (don't waste the user gesture on preloading)
+  const introUrl = MUSIC_TRACKS.intro;
+  let audio = audioCache[introUrl];
+  if (!audio) {
+    audio = new Audio(introUrl);
+    audio.preload = 'auto';
+    audioCache[introUrl] = audio;
+  }
+  audio.loop = true;
+  audio.currentTime = 0;
+  audio.volume = 0;
+  const p = audio.play();
   if (p && p.then) {
     p.then(() => {
-      musicStarted = true;
-      currentAudio = introAudio;
-      currentTrack = MUSIC_TRACKS.intro;
+      currentAudio = audio;
+      currentTrack = introUrl;
       musicPlaying = true;
       musicVolume = 0.6;
-    }).catch(() => { /* autoplay blocked — interaction listeners below will catch it */ });
+      fadeAudio(audio, 0, 0.6, 0.8);
+      document.getElementById('volume-control').style.display = 'flex';
+      // Preload other tracks AFTER music is already playing
+      setTimeout(preloadTracks, 500);
+    }).catch(() => {
+      // Play blocked even with gesture — retry on next interaction
+      musicStarted = false;
+    });
   }
 }
 
@@ -1800,26 +1806,49 @@ function tryAutoplayMusic() {
 function startMusicOnInteraction() {
   if (musicStarted) return;
   ensureMusic();
+  if (musicStarted) removeInteractionListeners();
+}
+
+function removeInteractionListeners() {
   document.removeEventListener('click', startMusicOnInteraction);
   document.removeEventListener('touchstart', startMusicOnInteraction);
   document.removeEventListener('keydown', startMusicOnInteraction);
-  document.removeEventListener('mousemove', startMusicOnInteraction);
-  document.removeEventListener('scroll', startMusicOnInteraction);
   document.removeEventListener('pointerdown', startMusicOnInteraction);
 }
-// Listen on EVERY possible interaction type for fastest music start
+
+// Listen on interaction types that count as user gestures (mousemove/scroll don't)
 document.addEventListener('click', startMusicOnInteraction);
 document.addEventListener('touchstart', startMusicOnInteraction);
 document.addEventListener('keydown', startMusicOnInteraction);
-document.addEventListener('mousemove', startMusicOnInteraction);
-document.addEventListener('scroll', startMusicOnInteraction);
 document.addEventListener('pointerdown', startMusicOnInteraction);
 
-// Attempt autoplay immediately (don't wait for DOMContentLoaded)
-tryAutoplayMusic();
-// Also retry after a short delay in case audio elements weren't ready
-setTimeout(tryAutoplayMusic, 100);
-setTimeout(tryAutoplayMusic, 500);
+// Try autoplay immediately (works on some browsers / after reload)
+(function tryAutoplay() {
+  if (musicStarted) return;
+  const introUrl = MUSIC_TRACKS.intro;
+  let audio = audioCache[introUrl];
+  if (!audio) {
+    audio = new Audio(introUrl);
+    audio.preload = 'auto';
+    audioCache[introUrl] = audio;
+  }
+  audio.volume = 0;
+  audio.loop = true;
+  const p = audio.play();
+  if (p && p.then) {
+    p.then(() => {
+      musicStarted = true;
+      currentAudio = audio;
+      currentTrack = introUrl;
+      musicPlaying = true;
+      musicVolume = 0.6;
+      fadeAudio(audio, 0, 0.6, 0.8);
+      document.getElementById('volume-control').style.display = 'flex';
+      removeInteractionListeners();
+      setTimeout(preloadTracks, 500);
+    }).catch(() => { /* autoplay blocked — interaction listeners will handle it */ });
+  }
+})();
 
 // FAILSAFE: if nothing is visible after 3s, force title screen
 setTimeout(function() {
@@ -1840,6 +1869,7 @@ setTimeout(function() {
     document.getElementById('title-screen').style.display = 'flex';
     const ni = document.getElementById('player-name-input');
     if (playerName) ni.value = playerName;
+    ensureMusic();
     return;
   }
   const intro = document.getElementById('intro-screen');
@@ -1940,9 +1970,10 @@ setTimeout(function() {
     }, 800);
   };
 
-  // Auto-advance after 7s, or click to skip
+  // Auto-advance after 7s, or click/tap to skip
   const timer = setTimeout(goToTitle, 7000);
-  intro.onclick = () => { clearTimeout(timer); goToTitle(); };
+  intro.addEventListener('click', () => { clearTimeout(timer); goToTitle(); });
+  intro.addEventListener('touchstart', () => { clearTimeout(timer); goToTitle(); });
 })();
 
 // ── EXIT / HOME — quit game and return to title ──
@@ -4870,7 +4901,17 @@ function playTrack(url, { crossfade = 1.5, loop = true, volume = 0.7, autoShuffl
 
   const playPromise = audio.play();
   if (playPromise) {
-    playPromise.catch(e => console.warn('Music play blocked:', e));
+    playPromise.catch(e => {
+      console.warn('Music play blocked:', e);
+      // Retry once on next user interaction
+      const retryOnce = () => {
+        audio.play().catch(() => {});
+        document.removeEventListener('click', retryOnce);
+        document.removeEventListener('touchstart', retryOnce);
+      };
+      document.addEventListener('click', retryOnce, { once: true });
+      document.addEventListener('touchstart', retryOnce, { once: true });
+    });
   }
 
   // Fade in
@@ -4958,8 +4999,9 @@ function stopMusic() {
 }
 
 function initMusic() {
+  // Called by ensureMusic — music is already playing by then,
+  // so just preload remaining tracks
   preloadTracks();
-  playIntroMusic();
 }
 
 function toggleMusic() {
