@@ -103,51 +103,119 @@ body {
   box-shadow: 0 0 30px rgba(212,175,55,0.3);
 }
 
-/* ── SPLASH OVERLAY (tap to begin) ── */
+/* ── CINEMATIC TAP GATE ── */
 #splash-overlay {
   position: fixed; inset: 0; z-index: 700;
   background: #000;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   cursor: pointer; text-align: center;
-  transition: opacity 0.6s ease;
+  overflow: hidden;
 }
-#splash-overlay .splash-branding {
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.85rem; color: #12cc72;
-  letter-spacing: 0.05em; opacity: 0;
-  animation: splashFadeUp 0.8s ease 0.3s forwards;
+#splash-overlay canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
 }
-#splash-overlay .splash-presents {
+#splash-overlay .gate-title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
-  font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.15em; color: var(--gold);
-  margin-top: 0.5rem; opacity: 0;
-  animation: splashFadeUp 0.8s ease 1s forwards;
-}
-#splash-overlay .splash-tap {
-  position: absolute; bottom: 2.5rem;
-  font-family: 'Oswald', sans-serif;
-  font-size: 0.7rem; text-transform: uppercase;
-  letter-spacing: 0.35em; color: rgba(255,255,255,0.25);
+  font-size: clamp(3.5rem, 12vw, 7rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, #fff 0%, var(--gold-light) 30%, var(--gold) 60%, #b8960c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(212,175,55,0.4));
+  position: relative; z-index: 2;
   opacity: 0;
-  animation: splashPulse 2s ease 1.8s infinite;
+  animation: gateReveal 1.2s ease 0.3s forwards;
 }
-@keyframes splashFadeUp {
-  0% { opacity: 0; transform: translateY(12px); }
+#splash-overlay .gate-title sup {
+  font-size: 0.45em;
+  vertical-align: super;
+  -webkit-text-fill-color: transparent;
+}
+#splash-overlay .gate-tap {
+  position: absolute; bottom: 3rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.4em; color: rgba(255,255,255,0.2);
+  z-index: 2; opacity: 0;
+  animation: gatePulse 2.5s ease 1.5s infinite;
+}
+@keyframes gateReveal {
+  0% { opacity: 0; transform: scale(0.85); filter: drop-shadow(0 0 0 rgba(212,175,55,0)); }
+  100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 40px rgba(212,175,55,0.4)); }
+}
+@keyframes gatePulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.45; }
+}
+
+/* ── CINEMATIC REVEAL (stadium) ── */
+#cinematic-reveal {
+  position: fixed; inset: 0; z-index: 650;
+  display: none;
+  overflow: hidden;
+  background: #000;
+}
+#cinematic-reveal .stadium-bg {
+  position: absolute; inset: -10%;
+  width: 120%; height: 120%;
+  background-image: url('gaffer26-stadium.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  animation: kenBurns 4s ease forwards;
+}
+#cinematic-reveal .cine-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 2;
+}
+#cinematic-reveal .cine-presents {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.35em; color: rgba(255,255,255,0.7);
+  opacity: 0;
+  animation: cineFadeUp 1s ease 0.5s forwards;
+}
+#cinematic-reveal .cine-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #fff, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 4px 20px rgba(0,0,0,0.8));
+  opacity: 0; margin-top: 0.3rem;
+  animation: cineFadeUp 1s ease 1.2s forwards;
+}
+#cinematic-reveal .cine-title sup {
+  font-size: 0.5em;
+  vertical-align: super;
+  -webkit-text-fill-color: transparent;
+}
+@keyframes kenBurns {
+  0% { opacity: 0; transform: scale(1); }
+  30% { opacity: 0.7; }
+  100% { opacity: 0.45; transform: scale(1.08); }
+}
+@keyframes cineFadeUp {
+  0% { opacity: 0; transform: translateY(15px); }
   100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes splashPulse {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.5; }
 }
 
 /* ── TITLE SCREEN ANIMATIONS ── */
 .ts-anim { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .ts-anim.ts-visible { opacity: 1; transform: translateY(0); }
-.ts-anim-logo { opacity: 0; transform: scale(0.8); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2,0,0.1,1), filter 0.7s ease; }
-.ts-anim-logo.ts-visible { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 30px rgba(212,175,55,0.3)); }
+/* ts-anim-logo removed — GAFFER26 text is now the hero */
 .ts-anim-fade { opacity: 0; transition: opacity 0.5s ease; }
 .ts-anim-fade.ts-visible { opacity: 0.5; }
 
@@ -1471,11 +1539,20 @@ body.shake { animation: shake 0.5s ease; }
 </head>
 <body>
 
-<!-- SPLASH OVERLAY — tap to begin (starts music) -->
+<!-- CINEMATIC TAP GATE -->
 <div id="splash-overlay">
-  <div class="splash-branding">powered by edenic labs</div>
-  <div class="splash-presents">ACFC Presents</div>
-  <div class="splash-tap">Tap anywhere to begin</div>
+  <canvas id="particle-canvas"></canvas>
+  <div class="gate-title">GAFFER<sup>26</sup></div>
+  <div class="gate-tap">Tap to begin</div>
+</div>
+
+<!-- CINEMATIC STADIUM REVEAL -->
+<div id="cinematic-reveal">
+  <div class="stadium-bg"></div>
+  <div class="cine-text">
+    <div class="cine-presents">ACFC Presents</div>
+    <div class="cine-title">GAFFER<sup>26</sup></div>
+  </div>
 </div>
 
 <!-- DRAFT SCREEN -->
@@ -1527,7 +1604,6 @@ body.shake { animation: shake 0.5s ease; }
 
 <!-- TITLE SCREEN -->
 <div id="title-screen" style="display:none">
-  <img src="gaffer26-logo.png" alt="GAFFER26" class="ts-anim-logo" style="max-width:min(180px,40vw); margin-bottom:0.3rem">
   <h1 class="ts-anim">GAFFER<span style="font-size:0.6em; vertical-align:super">26</span></h1>
   <div class="subtitle ts-anim">52 Premier League Legends</div>
   <div class="tagline ts-anim">Draft your legends. Deploy superpowers. Become the gaffer.</div>
@@ -1825,37 +1901,122 @@ function revealTitleScreen(animate) {
   }
 }
 
+// ── GOLDEN PARTICLE SYSTEM ──
+(function initParticles() {
+  const canvas = document.getElementById('particle-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animId;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function createParticle() {
+    return {
+      x: Math.random() * canvas.width,
+      y: canvas.height + 10,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -(Math.random() * 0.8 + 0.3),
+      size: Math.random() * 2.5 + 0.5,
+      alpha: Math.random() * 0.5 + 0.1,
+      life: 1,
+      decay: Math.random() * 0.003 + 0.001,
+      gold: Math.random() > 0.3
+    };
+  }
+
+  // Seed initial particles
+  for (let i = 0; i < 60; i++) {
+    const p = createParticle();
+    p.y = Math.random() * canvas.height;
+    p.life = Math.random();
+    particles.push(p);
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (particles.length < 80 && Math.random() > 0.6) particles.push(createParticle());
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= p.decay;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      const a = p.alpha * p.life;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.gold
+        ? `rgba(212,175,55,${a})`
+        : `rgba(255,255,255,${a * 0.4})`;
+      ctx.fill();
+    }
+    animId = requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Expose cleanup
+  window._stopParticles = function() {
+    cancelAnimationFrame(animId);
+    particles = [];
+  };
+})();
+
+// ── CINEMATIC INTRO FLOW ──
 (function initSplash() {
   const splash = document.getElementById('splash-overlay');
+  const cine = document.getElementById('cinematic-reveal');
 
-  // If returning visitor this session, skip splash entirely
+  // Returning visitor this session — skip everything
   if (sessionStorage.getItem('gaffer26-intro-seen')) {
     splash.style.display = 'none';
+    cine.style.display = 'none';
+    if (window._stopParticles) window._stopParticles();
     revealTitleScreen(false);
     ensureMusic();
     return;
   }
 
-  // First visit: show splash, wait for tap
   function dismissSplash() {
     splash.removeEventListener('click', dismissSplash);
     splash.removeEventListener('touchstart', dismissSplash);
     ensureMusic(); // User gesture — music starts reliably
     sessionStorage.setItem('gaffer26-intro-seen', '1');
+
+    // Phase 1: Fade out tap gate
+    splash.style.transition = 'opacity 0.8s ease';
     splash.style.opacity = '0';
+
     setTimeout(() => {
       splash.style.display = 'none';
-      revealTitleScreen(true);
-    }, 600);
+      if (window._stopParticles) window._stopParticles();
+
+      // Phase 2: Cinematic stadium reveal
+      cine.style.display = 'block';
+
+      // Phase 3: After cinematic, show title screen
+      setTimeout(() => {
+        cine.style.transition = 'opacity 0.8s ease';
+        cine.style.opacity = '0';
+        setTimeout(() => {
+          cine.style.display = 'none';
+          revealTitleScreen(true);
+        }, 800);
+      }, 3200);
+    }, 800);
   }
 
   splash.addEventListener('click', dismissSplash);
   splash.addEventListener('touchstart', dismissSplash);
 
-  // Failsafe: auto-dismiss after 8s if user doesn't tap
+  // Failsafe: auto-dismiss after 10s
   setTimeout(() => {
     if (splash.style.display !== 'none') dismissSplash();
-  }, 8000);
+  }, 10000);
 })();
 
 // ── EXIT / HOME — quit game and return to title ──
