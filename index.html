@@ -1524,14 +1524,12 @@ body.shake { animation: shake 0.5s ease; }
       <label style="font-family:'Oswald',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#555">Enter Your Name</label>
       <input type="text" id="gate-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.1rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:200px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
     </div>
-    <div style="display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center; margin-top:1rem">
-      <button class="btn-deal" onclick="startFromGate('cpu')" style="font-size:1rem; padding:0.7rem 2rem; margin-top:0">Full Match</button>
-      <button class="btn-deal" onclick="startFromGate('quick')" style="font-size:1rem; padding:0.7rem 2rem; margin-top:0; border-color:#f39c12; color:#f39c12">Quick Play</button>
-      <button class="btn-deal" onclick="startFromGate('draft')" style="font-size:1rem; padding:0.7rem 2rem; margin-top:0; border-color:#2ecc71; color:#2ecc71">Draft Mode</button>
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:1rem">
+      <button class="btn-deal" onclick="startFromGate('cpu')" style="font-size:1.3rem; padding:1rem 2.5rem; margin-top:0; border-width:3px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700">vs CPU</button>
+      <button class="btn-deal" onclick="showPvPSetup()" style="font-size:1.3rem; padding:1rem 2.5rem; margin-top:0; border-color:#4a90d9; color:#4a90d9; border-width:3px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700">vs Player</button>
     </div>
-    <div style="display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center; margin-top:0.6rem">
-      <button class="btn-deal" style="font-size:0.8rem; padding:0.4rem 1.5rem; margin-top:0; opacity:0.6" onclick="showPvPSetup()">vs Player</button>
-      <button class="btn-deal" style="font-size:0.8rem; padding:0.4rem 1.5rem; margin-top:0; opacity:0.6" onclick="showLeaderboard()">Leaderboard</button>
+    <div style="display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center; margin-top:0.8rem">
+      <button class="btn-deal" onclick="showLeaderboard()" style="font-size:0.75rem; padding:0.4rem 1.2rem; margin-top:0; opacity:0.5">Leaderboard</button>
     </div>
   </div>
 </div>
@@ -2932,21 +2930,36 @@ let draftState = {
 function startDraft(fullDeck, onComplete) {
   const shuffled = shuffle(fullDeck);
 
-  // Build rounds: each round has 4 random cards (any position)
+  // Build rounds: Rounds 1-4 are position-specific (GK, DEF, MID, STR)
+  // Round 5 is free pick from any remaining position
   const rounds = [];
   const usedCards = new Set();
-  const pool = [...shuffled];
-  for (let r = 0; r < DRAFT_ROUNDS; r++) {
+  const positionOrder = ['Goalkeeper', 'Defender', 'Midfielder', 'Striker'];
+
+  // Rounds 1-4: pick from each position
+  for (let r = 0; r < 4; r++) {
+    const pos = positionOrder[r];
+    const posCards = shuffled.filter(c => c.position === pos && !usedCards.has(c));
     const roundCards = [];
-    const available = pool.filter(c => !usedCards.has(c));
-    for (let i = 0; i < 4 && available.length > 0; i++) {
-      const idx = Math.floor(Math.random() * available.length);
-      const card = available.splice(idx, 1)[0];
+    for (let i = 0; i < 4 && posCards.length > 0; i++) {
+      const idx = Math.floor(Math.random() * posCards.length);
+      const card = posCards.splice(idx, 1)[0];
       roundCards.push(card);
       usedCards.add(card);
     }
     rounds.push(roundCards);
   }
+
+  // Round 5: free pick from any position (mixed pool)
+  const freePool = shuffled.filter(c => !usedCards.has(c));
+  const freeRound = [];
+  for (let i = 0; i < 4 && freePool.length > 0; i++) {
+    const idx = Math.floor(Math.random() * freePool.length);
+    const card = freePool.splice(idx, 1)[0];
+    freeRound.push(card);
+    usedCards.add(card);
+  }
+  rounds.push(freeRound);
 
   // Everything not used in draft rounds
   const remaining = shuffled.filter(c => !usedCards.has(c));
@@ -2978,10 +2991,12 @@ function updateDraftInfo() {
   const roundLabel = document.getElementById('draft-round-label');
   const roundNum = draftState.currentRound + 1;
   const totalRounds = DRAFT_ROUNDS;
-  roundLabel.textContent = `Round ${roundNum} of ${totalRounds}`;
+  const posLabels = ['Goalkeeper', 'Defender', 'Midfielder', 'Striker', 'Free Pick'];
+  const posLabel = posLabels[draftState.currentRound] || `Round ${roundNum}`;
+  roundLabel.textContent = `Round ${roundNum} of ${totalRounds} — ${posLabel}`;
 
   if (draftState.isPlayerTurn) {
-    el.textContent = `Your pick — choose a card`;
+    el.textContent = roundNum <= 4 ? `Pick your ${posLabel}` : `Free pick — any position`;
     el.style.color = 'var(--gold)';
   } else {
     el.textContent = `CPU is picking...`;
