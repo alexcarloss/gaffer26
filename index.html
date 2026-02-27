@@ -1473,7 +1473,6 @@ body.shake { animation: shake 0.5s ease; }
   <!-- Phase 1: edenic labs + ACFC presents -->
   <div id="intro-studio" style="opacity:0; text-align:center; z-index:2; transform:translateY(20px)">
     <div id="edenic-logo" style="font-family:'Poppins',sans-serif; font-size:clamp(1.2rem,4vw,1.8rem); font-weight:600; color:#12cc72; letter-spacing:0.05em; margin-bottom:1rem; opacity:0; filter:drop-shadow(0 0 20px rgba(18,204,114,0.5))">powered by edenic labs</div>
-    <div style="font-family:'Poppins',sans-serif; font-size:clamp(0.55rem,1.5vw,0.72rem); letter-spacing:0.15em; color:#12cc72; opacity:0" id="intro-made-by">powered by edenic labs</div>
     <div style="font-family:'Oswald',sans-serif; font-size:clamp(1.5rem,4.5vw,2.4rem); font-weight:700; text-transform:uppercase; letter-spacing:0.15em; color:var(--gold); margin-top:0.8rem; opacity:0; transform:scale(0.9)" id="intro-acfc">ACFC Presents</div>
   </div>
   <!-- Phase 2: Stadium canvas (drawn procedurally) -->
@@ -1535,7 +1534,7 @@ body.shake { animation: shake 0.5s ease; }
 </div>
 
 <!-- TITLE SCREEN -->
-<div id="title-screen" style="display:none">
+<div id="title-screen" style="display:none" onclick="ensureMusic()">
   <img src="gaffer26-logo.png" alt="GAFFER26" style="max-width:min(320px,70vw); margin-bottom:0.5rem; filter:drop-shadow(0 0 30px rgba(212,175,55,0.3))">
   <h1>GAFFER<span style="font-size:0.6em; vertical-align:super">26</span></h1>
   <div class="subtitle">52 Premier League Legends</div>
@@ -1566,9 +1565,7 @@ body.shake { animation: shake 0.5s ease; }
     <button class="btn-deal" style="font-size:0.85rem; padding:0.5rem 1.8rem; opacity:0.6" onclick="showPvPSetup()">vs Player</button>
     <button class="btn-deal" style="font-size:0.85rem; padding:0.5rem 1.8rem; opacity:0.6" onclick="showLeaderboard()">Leaderboard</button>
   </div>
-  <div style="margin-top:2rem; display:flex; align-items:center; gap:0.5rem; opacity:0.6">
-    <span style="font-family:'Poppins',sans-serif; font-size:0.7rem; font-weight:500; letter-spacing:0.05em; color:#12cc72">powered by edenic labs</span>
-  </div>
+  <!-- powered by edenic labs shown in intro only -->
 </div>
 
 <!-- PvP SETUP SCREEN -->
@@ -1767,13 +1764,13 @@ let shuffledGameplayTracks = [];
 
 const audioCache = {};
 
-// ── Start music IMMEDIATELY — aggressive autoplay with instant fallback ──
+// ── Start music on first user interaction (reliable across all browsers) ──
 let musicStarted = false;
+let musicConfirmed = false; // true only after audio is actually playing audibly
 
 function ensureMusic() {
-  if (musicStarted) return;
+  if (musicConfirmed) return;
   musicStarted = true;
-  // Play intro track DIRECTLY first (don't waste the user gesture on preloading)
   const introUrl = MUSIC_TRACKS.intro;
   let audio = audioCache[introUrl];
   if (!audio) {
@@ -1787,26 +1784,25 @@ function ensureMusic() {
   const p = audio.play();
   if (p && p.then) {
     p.then(() => {
+      musicConfirmed = true;
       currentAudio = audio;
       currentTrack = introUrl;
       musicPlaying = true;
       musicVolume = 0.6;
       fadeAudio(audio, 0, 0.6, 0.8);
       document.getElementById('volume-control').style.display = 'flex';
-      // Preload other tracks AFTER music is already playing
+      removeInteractionListeners();
       setTimeout(preloadTracks, 500);
     }).catch(() => {
-      // Play blocked even with gesture — retry on next interaction
       musicStarted = false;
     });
   }
 }
 
-// Fallback: start on ANY first user interaction if autoplay was blocked
+// Start music on ANY first user interaction (click, tap, key)
 function startMusicOnInteraction() {
-  if (musicStarted) return;
+  if (musicConfirmed) return;
   ensureMusic();
-  if (musicStarted) removeInteractionListeners();
 }
 
 function removeInteractionListeners() {
@@ -1816,39 +1812,11 @@ function removeInteractionListeners() {
   document.removeEventListener('pointerdown', startMusicOnInteraction);
 }
 
-// Listen on interaction types that count as user gestures (mousemove/scroll don't)
+// Listen on interaction types that count as user gestures
 document.addEventListener('click', startMusicOnInteraction);
 document.addEventListener('touchstart', startMusicOnInteraction);
 document.addEventListener('keydown', startMusicOnInteraction);
 document.addEventListener('pointerdown', startMusicOnInteraction);
-
-// Try autoplay immediately (works on some browsers / after reload)
-(function tryAutoplay() {
-  if (musicStarted) return;
-  const introUrl = MUSIC_TRACKS.intro;
-  let audio = audioCache[introUrl];
-  if (!audio) {
-    audio = new Audio(introUrl);
-    audio.preload = 'auto';
-    audioCache[introUrl] = audio;
-  }
-  audio.volume = 0;
-  audio.loop = true;
-  const p = audio.play();
-  if (p && p.then) {
-    p.then(() => {
-      musicStarted = true;
-      currentAudio = audio;
-      currentTrack = introUrl;
-      musicPlaying = true;
-      musicVolume = 0.6;
-      fadeAudio(audio, 0, 0.6, 0.8);
-      document.getElementById('volume-control').style.display = 'flex';
-      removeInteractionListeners();
-      setTimeout(preloadTracks, 500);
-    }).catch(() => { /* autoplay blocked — interaction listeners will handle it */ });
-  }
-})();
 
 // FAILSAFE: if nothing is visible after 3s, force title screen
 setTimeout(function() {
@@ -1867,6 +1835,7 @@ setTimeout(function() {
 (function runIntro() {
   if (sessionStorage.getItem('gaffer26-intro-seen')) {
     document.getElementById('title-screen').style.display = 'flex';
+    document.getElementById('volume-control').style.display = 'flex';
     const ni = document.getElementById('player-name-input');
     if (playerName) ni.value = playerName;
     ensureMusic();
@@ -1900,12 +1869,11 @@ setTimeout(function() {
 
   const studio = document.getElementById('intro-studio');
   const geeLogo = document.getElementById('edenic-logo');
-  const madeBy = document.getElementById('intro-made-by');
   const acfc = document.getElementById('intro-acfc');
   const logo = document.getElementById('intro-logo');
   const video = document.getElementById('intro-video');
 
-  // Phase 1: edenic labs fades in immediately, then "powered by edenic labs" types in, then "ACFC Presents" scales in
+  // Phase 1: edenic labs fades in immediately, then "ACFC Presents" scales in
   // Start studio visible immediately so user never sees pure black
   studio.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
   studio.style.opacity = '1'; studio.style.transform = 'translateY(0)';
@@ -1915,13 +1883,9 @@ setTimeout(function() {
     setTimeout(() => { geeLogo.style.transform = 'scale(1)'; }, 500);
   }, 100);
   setTimeout(() => {
-    madeBy.style.transition = 'opacity 0.8s ease';
-    madeBy.style.opacity = '1';
-  }, 900);
-  setTimeout(() => {
     acfc.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.2,0,0.1,1)';
     acfc.style.opacity = '1'; acfc.style.transform = 'scale(1)';
-  }, 1600);
+  }, 1200);
 
   // Phase 2: Studio fades out, logo slams in or video plays
   setTimeout(() => {
@@ -1965,15 +1929,19 @@ setTimeout(function() {
       const ts = document.getElementById('title-screen');
       ts.style.display = 'flex';
       ts.classList.add('title-animate-in');
+      document.getElementById('volume-control').style.display = 'flex';
       const ni = document.getElementById('player-name-input');
       if (playerName) ni.value = playerName;
     }, 800);
   };
 
+  // Start music during intro (user gesture from clicking intro screen)
+  ensureMusic();
+
   // Auto-advance after 7s, or click/tap to skip
   const timer = setTimeout(goToTitle, 7000);
-  intro.addEventListener('click', () => { clearTimeout(timer); goToTitle(); });
-  intro.addEventListener('touchstart', () => { clearTimeout(timer); goToTitle(); });
+  intro.addEventListener('click', () => { ensureMusic(); clearTimeout(timer); goToTitle(); });
+  intro.addEventListener('touchstart', () => { ensureMusic(); clearTimeout(timer); goToTitle(); });
 })();
 
 // ── EXIT / HOME — quit game and return to title ──
@@ -1995,7 +1963,7 @@ function goHome() {
   const ni = document.getElementById('player-name-input');
   if (playerName) ni.value = playerName;
   // Switch back to intro music on title screen
-  if (musicPlaying) { playIntroMusic(); } else { musicStarted = false; ensureMusic(); }
+  if (musicPlaying) { playIntroMusic(); } else { musicStarted = false; musicConfirmed = false; ensureMusic(); }
 }
 
 function startGameWithName(mode) {
@@ -2923,26 +2891,19 @@ let draftState = {
 function startDraft(fullDeck, onComplete) {
   const shuffled = shuffle(fullDeck);
 
-  // Group cards by position
-  const byPos = {};
-  POSITIONS.forEach(p => byPos[p] = []);
-  shuffled.forEach(card => {
-    if (byPos[card.position]) byPos[card.position].push(card);
-  });
-
-  // Build rounds: each round has 1 card from each position
+  // Build rounds: each round has 4 random cards (any position)
   const rounds = [];
   const usedCards = new Set();
+  const pool = [...shuffled];
   for (let r = 0; r < DRAFT_ROUNDS; r++) {
     const roundCards = [];
-    POSITIONS.forEach(pos => {
-      const available = byPos[pos].filter(c => !usedCards.has(c));
-      if (available.length > 0) {
-        const card = available[Math.floor(Math.random() * available.length)];
-        roundCards.push(card);
-        usedCards.add(card);
-      }
-    });
+    const available = pool.filter(c => !usedCards.has(c));
+    for (let i = 0; i < 4 && available.length > 0; i++) {
+      const idx = Math.floor(Math.random() * available.length);
+      const card = available.splice(idx, 1)[0];
+      roundCards.push(card);
+      usedCards.add(card);
+    }
     rounds.push(roundCards);
   }
 
@@ -3057,16 +3018,14 @@ async function draftPickCard(index) {
 }
 
 async function cpuDraftPick() {
-  // CPU picks the best remaining card from this round
-  let bestCard = null, bestScore = -1;
-  draftState.roundCards.forEach(card => {
-    if (draftState.playerPicks.includes(card) || draftState.cpuPicks.includes(card)) return;
-    const score = card.pace + card.shooting + card.passing + card.defending + Math.random() * 10;
-    if (score > bestScore) { bestScore = score; bestCard = card; }
-  });
+  // CPU picks randomly from remaining cards in this round
+  const available = draftState.roundCards.filter(card =>
+    !draftState.playerPicks.includes(card) && !draftState.cpuPicks.includes(card)
+  );
 
-  if (bestCard) {
-    draftState.cpuPicks.push(bestCard);
+  if (available.length > 0) {
+    const pick = available[Math.floor(Math.random() * available.length)];
+    draftState.cpuPicks.push(pick);
     screenFlash('red', 100);
   }
 
@@ -5005,6 +4964,8 @@ function initMusic() {
 }
 
 function toggleMusic() {
+  // If music hasn't started yet, start it on this user gesture
+  if (!musicConfirmed) { ensureMusic(); return; }
   musicMuted = !musicMuted;
   const btn = document.getElementById('vol-btn');
   if (musicMuted) {
