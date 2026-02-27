@@ -103,48 +103,53 @@ body {
   box-shadow: 0 0 30px rgba(212,175,55,0.3);
 }
 
-/* ── TITLE SCREEN ANIMATIONS ── */
-#title-screen.title-animate-in > img {
-  opacity: 0; transform: scale(0.6) translateY(30px);
-  animation: titleLogoIn 1s cubic-bezier(0.2,0,0.1,1) 0.2s forwards;
+/* ── SPLASH OVERLAY (tap to begin) ── */
+#splash-overlay {
+  position: fixed; inset: 0; z-index: 700;
+  background: #000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: pointer; text-align: center;
+  transition: opacity 0.6s ease;
 }
-#title-screen.title-animate-in > h1 {
-  opacity: 0; transform: translateY(40px);
-  animation: titleTextIn 0.8s cubic-bezier(0.2,0,0.1,1) 0.6s forwards;
+#splash-overlay .splash-branding {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem; color: #12cc72;
+  letter-spacing: 0.05em; opacity: 0;
+  animation: splashFadeUp 0.8s ease 0.3s forwards;
 }
-#title-screen.title-animate-in > .subtitle {
-  opacity: 0; transform: translateY(30px);
-  animation: titleTextIn 0.7s cubic-bezier(0.2,0,0.1,1) 0.9s forwards;
+#splash-overlay .splash-presents {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--gold);
+  margin-top: 0.5rem; opacity: 0;
+  animation: splashFadeUp 0.8s ease 1s forwards;
 }
-#title-screen.title-animate-in > .tagline {
-  opacity: 0; transform: translateY(20px);
-  animation: titleTextIn 0.6s ease-out 1.1s forwards;
+#splash-overlay .splash-tap {
+  position: absolute; bottom: 2.5rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.35em; color: rgba(255,255,255,0.25);
+  opacity: 0;
+  animation: splashPulse 2s ease 1.8s infinite;
 }
-#title-screen.title-animate-in > #name-entry {
-  opacity: 0; transform: translateY(20px);
-  animation: titleTextIn 0.6s ease-out 1.3s forwards;
-}
-#title-screen.title-animate-in > div {
-  opacity: 0; transform: translateY(15px);
-  animation: titleTextIn 0.5s ease-out 1.5s forwards;
-}
-#title-screen.title-animate-in > div:last-child {
-  opacity: 0; transform: none;
-  animation: titleFadeIn 0.6s ease-out 1.8s forwards;
-}
-@keyframes titleLogoIn {
-  0% { opacity: 0; transform: scale(0.6) translateY(30px); filter: drop-shadow(0 0 0px rgba(212,175,55,0)); }
-  60% { opacity: 1; transform: scale(1.05) translateY(-5px); filter: drop-shadow(0 0 50px rgba(212,175,55,0.6)); }
-  100% { opacity: 1; transform: scale(1) translateY(0); filter: drop-shadow(0 0 30px rgba(212,175,55,0.3)); }
-}
-@keyframes titleTextIn {
-  0% { opacity: 0; transform: translateY(30px); }
+@keyframes splashFadeUp {
+  0% { opacity: 0; transform: translateY(12px); }
   100% { opacity: 1; transform: translateY(0); }
 }
-@keyframes titleFadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 0.4; }
+@keyframes splashPulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
 }
+
+/* ── TITLE SCREEN ANIMATIONS ── */
+.ts-anim { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.ts-anim.ts-visible { opacity: 1; transform: translateY(0); }
+.ts-anim-logo { opacity: 0; transform: scale(0.8); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2,0,0.1,1), filter 0.7s ease; }
+.ts-anim-logo.ts-visible { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 30px rgba(212,175,55,0.3)); }
+.ts-anim-fade { opacity: 0; transition: opacity 0.5s ease; }
+.ts-anim-fade.ts-visible { opacity: 0.5; }
 
 /* ── EXIT / HOME BUTTON ── */
 .exit-btn {
@@ -1466,24 +1471,11 @@ body.shake { animation: shake 0.5s ease; }
 </head>
 <body>
 
-<!-- CINEMATIC INTRO (plays once per session) -->
-<div id="intro-screen" style="display:none; position:fixed; inset:0; z-index:600; background:#000; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; overflow:hidden">
-  <div id="intro-loading" style="position:absolute; bottom:2rem; font-family:sans-serif; font-size:0.7rem; letter-spacing:0.3em; color:rgba(255,255,255,0.2); text-transform:uppercase; z-index:10">tap to skip</div>
-  <canvas id="intro-particles" style="position:absolute;inset:0;z-index:0"></canvas>
-  <!-- Phase 1: edenic labs + ACFC presents -->
-  <div id="intro-studio" style="opacity:0; text-align:center; z-index:2; transform:translateY(20px)">
-    <div id="edenic-logo" style="font-family:'Poppins',sans-serif; font-size:clamp(1.2rem,4vw,1.8rem); font-weight:600; color:#12cc72; letter-spacing:0.05em; margin-bottom:1rem; opacity:0; filter:drop-shadow(0 0 20px rgba(18,204,114,0.5))">powered by edenic labs</div>
-    <div style="font-family:'Oswald',sans-serif; font-size:clamp(1.5rem,4.5vw,2.4rem); font-weight:700; text-transform:uppercase; letter-spacing:0.15em; color:var(--gold); margin-top:0.8rem; opacity:0; transform:scale(0.9)" id="intro-acfc">ACFC Presents</div>
-  </div>
-  <!-- Phase 2: Stadium canvas (drawn procedurally) -->
-  <canvas id="intro-stadium" style="position:absolute;inset:0;z-index:1;opacity:0"></canvas>
-  <!-- Phase 3: Logo + title -->
-  <div id="intro-title-wrap" style="position:absolute;z-index:4;text-align:center;opacity:0;transform:scale(0.3)">
-    <img id="intro-logo" src="gaffer26-logo.png" alt="GAFFER26" style="max-width:min(400px,80vw); filter:drop-shadow(0 0 50px rgba(212,175,55,0.6))">
-    <div style="font-family:'Oswald',sans-serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;background:linear-gradient(135deg,#fff,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:0.5rem;filter:drop-shadow(0 2px 15px rgba(212,175,55,0.5))" id="intro-title-text">GAFFER<span style="font-size:0.55em;vertical-align:super">26</span></div>
-    <div style="font-family:'Oswald',sans-serif;font-size:clamp(0.7rem,2vw,1rem);text-transform:uppercase;letter-spacing:0.35em;color:#888;margin-top:0.3rem;opacity:0" id="intro-tagline">52 Premier League Legends</div>
-  </div>
-  <video id="intro-video" src="gaffer26-logo-animation.mp4" muted playsinline style="max-width:100vw; max-height:100vh; object-fit:contain; opacity:0; position:absolute; display:none; z-index:5"></video>
+<!-- SPLASH OVERLAY — tap to begin (starts music) -->
+<div id="splash-overlay">
+  <div class="splash-branding">powered by edenic labs</div>
+  <div class="splash-presents">ACFC Presents</div>
+  <div class="splash-tap">Tap anywhere to begin</div>
 </div>
 
 <!-- DRAFT SCREEN -->
@@ -1534,38 +1526,37 @@ body.shake { animation: shake 0.5s ease; }
 </div>
 
 <!-- TITLE SCREEN -->
-<div id="title-screen" style="display:none" onclick="ensureMusic()">
-  <img src="gaffer26-logo.png" alt="GAFFER26" style="max-width:min(320px,70vw); margin-bottom:0.5rem; filter:drop-shadow(0 0 30px rgba(212,175,55,0.3))">
-  <h1>GAFFER<span style="font-size:0.6em; vertical-align:super">26</span></h1>
-  <div class="subtitle">52 Premier League Legends</div>
-  <div class="tagline">Draft your legends. Deploy superpowers. Become the gaffer.</div>
-  <div style="margin-top:1.2rem; background:rgba(212,175,55,0.08); border:2px solid rgba(212,175,55,0.25); border-radius:12px; padding:1.2rem 1.5rem; max-width:420px; text-align:left">
-    <div style="font-family:'Oswald',sans-serif; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:0.7rem; text-align:center">⚡ How to Play ⚡</div>
+<div id="title-screen" style="display:none">
+  <img src="gaffer26-logo.png" alt="GAFFER26" class="ts-anim-logo" style="max-width:min(180px,40vw); margin-bottom:0.3rem">
+  <h1 class="ts-anim">GAFFER<span style="font-size:0.6em; vertical-align:super">26</span></h1>
+  <div class="subtitle ts-anim">52 Premier League Legends</div>
+  <div class="tagline ts-anim">Draft your legends. Deploy superpowers. Become the gaffer.</div>
+  <div class="ts-anim" style="margin-top:1.2rem; background:rgba(212,175,55,0.08); border:2px solid rgba(212,175,55,0.25); border-radius:12px; padding:1.2rem 1.5rem; max-width:420px; text-align:left">
+    <div style="font-family:'Oswald',sans-serif; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:0.7rem; text-align:center">How to Play</div>
     <div style="font-size:0.85rem; color:#bbb; line-height:1.8">
       <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.1rem; min-width:1.5rem">1.</span><span>Draft your squad — pick 5 legends from the pool</span></div>
       <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.1rem; min-width:1.5rem">2.</span><span>Play a card, then choose your strongest stat</span></div>
       <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.1rem; min-width:1.5rem">3.</span><span>Win the round — highest stat wins the cards!</span></div>
     </div>
     <div style="margin-top:0.8rem; background:rgba(212,175,55,0.12); border:2px solid var(--gold); border-radius:8px; padding:0.8rem 1rem; text-align:center; animation:spCallout 1.5s ease infinite">
-      <div style="font-family:'Oswald',sans-serif; font-size:1rem; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.3rem">⚡ SUPERPOWER ⚡</div>
+      <div style="font-family:'Oswald',sans-serif; font-size:1rem; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.3rem">SUPERPOWER</div>
       <div style="font-size:0.8rem; color:#ddd; line-height:1.5">Every card has a <strong style="color:var(--gold)">unique superpower</strong> — a game-changing ability!<br>When the <strong style="color:#fff">big glowing button</strong> appears, <strong style="color:var(--gold)">TAP IT</strong> to unleash chaos.</div>
-      <div style="font-size:0.75rem; color:#e74c3c; font-weight:600; margin-top:0.4rem">⚠️ Only 3 per game — choose your moment!</div>
+      <div style="font-size:0.75rem; color:#e74c3c; font-weight:600; margin-top:0.4rem">Only 3 per game — choose your moment!</div>
     </div>
   </div>
-  <div id="name-entry" style="margin-top:1.2rem; display:flex; flex-direction:column; align-items:center; gap:0.6rem">
+  <div id="name-entry" class="ts-anim" style="margin-top:1.2rem; display:flex; flex-direction:column; align-items:center; gap:0.6rem">
     <label style="font-family:'Oswald',sans-serif; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.2em; color:#666">Enter Your Name</label>
     <input type="text" id="player-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.2rem; padding:0.6rem 1.5rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:220px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
   </div>
-  <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:1.5rem">
+  <div class="ts-anim" style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:1.5rem">
     <button class="btn-deal" onclick="startGameWithName('cpu')">Full Match</button>
     <button class="btn-deal" onclick="startGameWithName('quick')" style="border-color:#f39c12; color:#f39c12">Quick Play</button>
     <button class="btn-deal" onclick="startGameWithName('draft')" style="border-color:#2ecc71; color:#2ecc71">Draft Mode</button>
   </div>
-  <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:0.8rem">
+  <div class="ts-anim-fade" style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:0.8rem">
     <button class="btn-deal" style="font-size:0.85rem; padding:0.5rem 1.8rem; opacity:0.6" onclick="showPvPSetup()">vs Player</button>
     <button class="btn-deal" style="font-size:0.85rem; padding:0.5rem 1.8rem; opacity:0.6" onclick="showLeaderboard()">Leaderboard</button>
   </div>
-  <!-- powered by edenic labs shown in intro only -->
 </div>
 
 <!-- PvP SETUP SCREEN -->
@@ -1812,136 +1803,59 @@ function removeInteractionListeners() {
   document.removeEventListener('pointerdown', startMusicOnInteraction);
 }
 
-// Listen on interaction types that count as user gestures
-document.addEventListener('click', startMusicOnInteraction);
-document.addEventListener('touchstart', startMusicOnInteraction);
-document.addEventListener('keydown', startMusicOnInteraction);
-document.addEventListener('pointerdown', startMusicOnInteraction);
+// ── SPLASH → TITLE FLOW ──
+// Splash overlay handles the browser autoplay restriction:
+// user taps → music starts → splash fades → title animates in
 
-// FAILSAFE: if nothing is visible after 3s, force title screen
-setTimeout(function() {
+function revealTitleScreen(animate) {
   const ts = document.getElementById('title-screen');
-  const intro = document.getElementById('intro-screen');
-  const game = document.getElementById('game-screen');
-  const draft = document.getElementById('draft-screen');
-  const anyVisible = [ts,intro,game,draft].some(el => el && el.style.display !== 'none');
-  if (!anyVisible && ts) {
-    ts.style.display = 'flex';
-    ensureMusic();
+  ts.style.display = 'flex';
+  document.getElementById('volume-control').style.display = 'flex';
+  const ni = document.getElementById('player-name-input');
+  if (playerName) ni.value = playerName;
+  if (animate) {
+    // Stagger animations on each .ts-anim element
+    const items = ts.querySelectorAll('.ts-anim, .ts-anim-logo, .ts-anim-fade');
+    items.forEach((el, i) => {
+      setTimeout(() => el.classList.add('ts-visible'), 100 + i * 120);
+    });
+  } else {
+    // Skip animation — make everything visible instantly
+    ts.querySelectorAll('.ts-anim, .ts-anim-logo, .ts-anim-fade').forEach(el => el.classList.add('ts-visible'));
   }
-}, 3000);
+}
 
-// Run cinematic intro on first visit per session
-(function runIntro() {
+(function initSplash() {
+  const splash = document.getElementById('splash-overlay');
+
+  // If returning visitor this session, skip splash entirely
   if (sessionStorage.getItem('gaffer26-intro-seen')) {
-    document.getElementById('title-screen').style.display = 'flex';
-    document.getElementById('volume-control').style.display = 'flex';
-    const ni = document.getElementById('player-name-input');
-    if (playerName) ni.value = playerName;
+    splash.style.display = 'none';
+    revealTitleScreen(false);
     ensureMusic();
     return;
   }
-  const intro = document.getElementById('intro-screen');
-  intro.style.display = 'flex';
 
-  // ── Particle system (golden sparks) ──
-  const canvas = document.getElementById('intro-particles');
-  const ctx2d = canvas.getContext('2d');
-  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const particles = [];
-  for (let i = 0; i < 80; i++) {
-    particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.5, vy: -Math.random()*1.5-0.3, r: Math.random()*2+1, a: Math.random(), life: Math.random() });
-  }
-  let particleAnim = true;
-  function drawParticles() {
-    if (!particleAnim) return;
-    ctx2d.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy; p.life -= 0.003;
-      if (p.life <= 0 || p.y < -10) { p.x = Math.random()*canvas.width; p.y = canvas.height+10; p.life = 1; }
-      ctx2d.beginPath(); ctx2d.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx2d.fillStyle = `rgba(212,175,55,${p.life*0.4})`;
-      ctx2d.fill();
-    });
-    requestAnimationFrame(drawParticles);
-  }
-  drawParticles();
-
-  const studio = document.getElementById('intro-studio');
-  const geeLogo = document.getElementById('edenic-logo');
-  const acfc = document.getElementById('intro-acfc');
-  const logo = document.getElementById('intro-logo');
-  const video = document.getElementById('intro-video');
-
-  // Phase 1: edenic labs fades in immediately, then "ACFC Presents" scales in
-  // Start studio visible immediately so user never sees pure black
-  studio.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-  studio.style.opacity = '1'; studio.style.transform = 'translateY(0)';
-  setTimeout(() => {
-    geeLogo.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    geeLogo.style.opacity = '1'; geeLogo.style.transform = 'scale(1.1)';
-    setTimeout(() => { geeLogo.style.transform = 'scale(1)'; }, 500);
-  }, 100);
-  setTimeout(() => {
-    acfc.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.2,0,0.1,1)';
-    acfc.style.opacity = '1'; acfc.style.transform = 'scale(1)';
-  }, 1200);
-
-  // Phase 2: Studio fades out, logo slams in or video plays
-  setTimeout(() => {
-    studio.style.transition = 'opacity 0.6s ease';
-    studio.style.opacity = '0';
-    if (video.canPlayType && video.canPlayType('video/mp4')) {
-      video.style.display = 'block';
-      setTimeout(() => {
-        video.style.transition = 'opacity 0.5s';
-        video.style.opacity = '1';
-        video.play().catch(() => {
-          video.style.display = 'none';
-          showLogoAnimated();
-        });
-      }, 200);
-    } else {
-      showLogoAnimated();
-    }
-  }, 3200);
-
-  function showLogoAnimated() {
-    logo.style.transition = 'opacity 0.6s ease, transform 0.8s cubic-bezier(0.2,0,0.1,1.2), filter 0.8s ease';
-    logo.style.opacity = '1';
-    logo.style.transform = 'scale(1.05) rotate(0deg)';
-    logo.style.filter = 'drop-shadow(0 0 60px rgba(212,175,55,0.7))';
-    setTimeout(() => {
-      logo.style.transform = 'scale(1) rotate(0deg)';
-      logo.style.filter = 'drop-shadow(0 0 30px rgba(212,175,55,0.4))';
-    }, 800);
-  }
-
-  // Phase 3: Transition to title screen (with title animation)
-  const goToTitle = () => {
-    ensureMusic(); // Start music when transitioning
-    particleAnim = false;
+  // First visit: show splash, wait for tap
+  function dismissSplash() {
+    splash.removeEventListener('click', dismissSplash);
+    splash.removeEventListener('touchstart', dismissSplash);
+    ensureMusic(); // User gesture — music starts reliably
     sessionStorage.setItem('gaffer26-intro-seen', '1');
-    intro.style.transition = 'opacity 0.8s ease';
-    intro.style.opacity = '0';
+    splash.style.opacity = '0';
     setTimeout(() => {
-      intro.style.display = 'none';
-      const ts = document.getElementById('title-screen');
-      ts.style.display = 'flex';
-      ts.classList.add('title-animate-in');
-      document.getElementById('volume-control').style.display = 'flex';
-      const ni = document.getElementById('player-name-input');
-      if (playerName) ni.value = playerName;
-    }, 800);
-  };
+      splash.style.display = 'none';
+      revealTitleScreen(true);
+    }, 600);
+  }
 
-  // Start music during intro (user gesture from clicking intro screen)
-  ensureMusic();
+  splash.addEventListener('click', dismissSplash);
+  splash.addEventListener('touchstart', dismissSplash);
 
-  // Auto-advance after 7s, or click/tap to skip
-  const timer = setTimeout(goToTitle, 7000);
-  intro.addEventListener('click', () => { ensureMusic(); clearTimeout(timer); goToTitle(); });
-  intro.addEventListener('touchstart', () => { ensureMusic(); clearTimeout(timer); goToTitle(); });
+  // Failsafe: auto-dismiss after 8s if user doesn't tap
+  setTimeout(() => {
+    if (splash.style.display !== 'none') dismissSplash();
+  }, 8000);
 })();
 
 // ── EXIT / HOME — quit game and return to title ──
@@ -1955,13 +1869,8 @@ function goHome() {
   document.getElementById('leaderboard-screen').style.display = 'none';
   document.getElementById('pvp-screen').style.display = 'none';
   document.getElementById('exit-btn').style.display = 'none';
-  // Show title
-  const ts = document.getElementById('title-screen');
-  ts.style.display = 'flex';
-  ts.classList.remove('title-animate-in');
-  // Restore name
-  const ni = document.getElementById('player-name-input');
-  if (playerName) ni.value = playerName;
+  // Show title (no animation on return, everything already visible)
+  revealTitleScreen(false);
   // Switch back to intro music on title screen
   if (musicPlaying) { playIntroMusic(); } else { musicStarted = false; musicConfirmed = false; ensureMusic(); }
 }
