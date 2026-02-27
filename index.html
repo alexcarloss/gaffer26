@@ -102,6 +102,13 @@ body {
   color: var(--dark);
   box-shadow: 0 0 30px rgba(212,175,55,0.3);
 }
+.pack-btn.pack-active {
+  border-color: var(--gold) !important;
+  color: var(--gold) !important;
+  opacity: 1 !important;
+  background: rgba(212,175,55,0.08);
+  box-shadow: 0 0 12px rgba(212,175,55,0.15);
+}
 
 /* ── CINEMATIC TAP GATE ── */
 #splash-overlay {
@@ -1524,6 +1531,17 @@ body.shake { animation: shake 0.5s ease; }
       <label style="font-family:'Oswald',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#555">Enter Your Name</label>
       <input type="text" id="gate-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.1rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:200px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
     </div>
+    <!-- PACK SELECTION -->
+    <div style="margin-top:1rem; display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap" id="pack-selector">
+      <button class="btn-deal pack-btn pack-active" data-pack="prem" onclick="selectPack('prem')" style="font-size:0.85rem; padding:0.5rem 1.2rem; margin-top:0; border-width:2px; letter-spacing:0.05em; display:flex; align-items:center; gap:0.4rem">
+        <span style="font-size:1.2rem">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span> Premier League
+      </button>
+      <button class="btn-deal pack-btn" data-pack="world" onclick="selectPack('world')" style="font-size:0.85rem; padding:0.5rem 1.2rem; margin-top:0; border-width:2px; letter-spacing:0.05em; opacity:0.5; border-color:#555; color:#888; display:flex; align-items:center; gap:0.4rem">
+        <span style="font-size:1.2rem">🌍</span> World Legends
+      </button>
+    </div>
+    <div id="pack-desc" style="font-size:0.65rem; color:#666; text-align:center; margin-top:0.3rem; font-style:italic">52 PL legends & memes</div>
+
     <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:1rem">
       <button class="btn-deal" onclick="startFromGate('cpu')" style="font-size:1.3rem; padding:1rem 2.5rem; margin-top:0; border-width:3px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700">vs CPU</button>
       <button class="btn-deal" onclick="showPvPSetup()" style="font-size:1.3rem; padding:1rem 2.5rem; margin-top:0; border-color:#4a90d9; color:#4a90d9; border-width:3px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700">vs Player</button>
@@ -1861,6 +1879,19 @@ function showGateMenu() {
   if (tap) tap.style.display = 'none';
 }
 
+function selectPack(packId) {
+  selectedPack = packId;
+  const pack = PACKS[packId];
+  document.getElementById('pack-desc').textContent = pack.desc;
+  document.querySelectorAll('.pack-btn').forEach(btn => {
+    const isActive = btn.dataset.pack === packId;
+    btn.classList.toggle('pack-active', isActive);
+    btn.style.opacity = isActive ? '1' : '0.5';
+    btn.style.borderColor = isActive ? 'var(--gold)' : '#555';
+    btn.style.color = isActive ? 'var(--gold)' : '#888';
+  });
+}
+
 function startFromGate(mode) {
   const ni = document.getElementById('gate-name-input');
   playerName = ni.value.trim() || 'THE GAFFER';
@@ -2126,7 +2157,7 @@ function handlePeerMessage(data) {
   switch(data.type) {
     case 'card-played':
       // Opponent played a card
-      state.cpuCard = ALL_CARDS.find(c => c.name === data.cardName);
+      state.cpuCard = PACKS[selectedPack].cards.find(c => c.name === data.cardName);
       if (state.cpuCard) {
         state.cpuCard = {...state.cpuCard, ability: {...state.cpuCard.ability}};
         renderCard(state.cpuCard, document.getElementById('cpu-card-front'));
@@ -2270,6 +2301,112 @@ const ALL_CARDS = [
 ];
 
 // ═══════════════════════════════════════════════════════════
+// PACK 2: WORLD LEGENDS — 43 Cards
+// ═══════════════════════════════════════════════════════════
+const PACK2_CARDS = [
+  // ♠ ICONS — The untouchables + global legends
+  { name:"Diego Maradona", nickname:"Hand of God, Goal of the Century — same match", position:"Striker", suit:"♠", rank:14, rankLabel:"A", tekkers:97, shithousery:80, madness:78, clutch:92, vibes:95,
+    ability:{ name:"Hand of God", desc:"Play two stats simultaneously — your highest AND your Shithousery. Opponent must beat both to win.", type:"manual" }},
+  { name:"Pelé", nickname:"1,000 goals, 3 World Cups, invented being famous at football", position:"Striker", suit:"♠", rank:13, rankLabel:"K", tekkers:96, shithousery:15, madness:20, clutch:95, vibes:90,
+    ability:{ name:"The King's Crown", desc:"Auto-win any round where your Tekkers exceeds the opponent's. If it doesn't, round voided — replay.", type:"manual" }},
+  { name:"Lionel Messi", nickname:"Quiet genius, never celebrated, just destroyed you", position:"Striker", suit:"♠", rank:12, rankLabel:"Q", tekkers:99, shithousery:8, madness:10, clutch:92, vibes:85,
+    ability:{ name:"The GOAT Debate", desc:"Round is decided by Tekkers regardless of what was picked. Messi doesn't play your game.", type:"manual" }},
+  { name:"Zinedine Zidane", nickname:"The headbutt. Also the best midfielder ever. But the headbutt.", position:"Midfielder", suit:"♠", rank:11, rankLabel:"J", tekkers:95, shithousery:45, madness:72, clutch:85, vibes:88,
+    ability:{ name:"The Headbutt", desc:"If losing, Madness becomes 99 and replay the round. But if used in the final 3 rounds, get sent off (discard card permanently).", type:"manual" }},
+  { name:"Ronaldinho", nickname:"Smiled at everyone, even the ones he was humiliating", position:"Striker", suit:"♠", rank:10, rankLabel:"10", tekkers:97, shithousery:20, madness:55, clutch:65, vibes:98,
+    ability:{ name:"Standing Ovation", desc:"Opponent's card is stunned — all their stats drop by 15. The Bernabéu stood up. They will too.", type:"manual" }},
+  { name:"Johan Cruyff", nickname:"Invented Total Football, turned, and changed everything", position:"Striker", suit:"♠", rank:9, rankLabel:"9", tekkers:95, shithousery:30, madness:35, clutch:80, vibes:88,
+    ability:{ name:"Cruyff Turn", desc:"Reverse the result — if you lose, you win. If you win, you still win. Once per game.", type:"manual" }},
+  { name:"Franz Beckenbauer", nickname:"The Kaiser. Invented the sweeper by refusing to stay put", position:"Defender", suit:"♠", rank:8, rankLabel:"8", tekkers:88, shithousery:25, madness:15, clutch:90, vibes:82,
+    ability:{ name:"Der Kaiser", desc:"Command the pitch — choose which stat BOTH cards play this round.", type:"manual" }},
+  { name:"Ronaldo Nazário", nickname:"Knees made of glass, feet made of gold, found in nightclubs", position:"Striker", suit:"♠", rank:7, rankLabel:"7", tekkers:96, shithousery:30, madness:65, clutch:78, vibes:92,
+    ability:{ name:"Il Fenomeno", desc:"50% chance: Tekkers AND Clutch become 99 (peak R9). 50% chance: both become 30 (the knees gave out).", type:"manual" }},
+  { name:"George Best", nickname:"Spent it all on booze, birds, and fast cars. Wasted the rest.", position:"Striker", suit:"♠", rank:6, rankLabel:"6", tekkers:92, shithousery:35, madness:82, clutch:55, vibes:95,
+    ability:{ name:"Where Did It All Go?", desc:"Auto-win if playing Tekkers or Vibes. But 20% chance Best doesn't show up (card skipped, play next instead).", type:"manual" }},
+  { name:"Gianluigi Buffon", nickname:"Played until he was 100. Still decent.", position:"Goalkeeper", suit:"♠", rank:5, rankLabel:"5", tekkers:70, shithousery:20, madness:15, clutch:92, vibes:72,
+    ability:{ name:"The Wall", desc:"If you lose by 15 or less, Buffon saves it — round is a draw.", type:"manual" }},
+
+  // ♥ ENTERTAINERS & EGOS — style, personality, flair
+  { name:"Neymar", nickname:"Cost more than most countries. Rolled more than a bowling ball.", position:"Striker", suit:"♥", rank:14, rankLabel:"A", tekkers:93, shithousery:82, madness:72, clutch:62, vibes:85,
+    ability:{ name:"The Roll", desc:"If you lose, coin flip: heads = round replayed. Tails = booked, Clutch drops to 10 next round.", type:"manual" }},
+  { name:"Zlatan Ibrahimović", nickname:"Zlatan doesn't do auditions", position:"Striker", suit:"♥", rank:13, rankLabel:"K", tekkers:90, shithousery:55, madness:60, clutch:82, vibes:95,
+    ability:{ name:"The Zlatan", desc:"Declare your stat is 99. If opponent's is genuinely higher, your bluff fails — auto-lose. Zlatan states facts.", type:"manual" }},
+  { name:"Roberto Carlos", nickname:"That free kick. The one that defied physics.", position:"Defender", suit:"♥", rank:12, rankLabel:"Q", tekkers:85, shithousery:30, madness:55, clutch:82, vibes:88,
+    ability:{ name:"The Banana Shot", desc:"If opponent's stat is within 20 of yours, you win (the ball curved). Bigger gap = physics can't save you.", type:"manual" }},
+  { name:"Andrea Pirlo", nickname:"Never ran. Drank wine at halftime. Probably.", position:"Midfielder", suit:"♥", rank:11, rankLabel:"J", tekkers:92, shithousery:35, madness:10, clutch:78, vibes:92,
+    ability:{ name:"Il Vino", desc:"Play your Vibes against their highest stat. If your Vibes wins, you win. Pirlo never tried. That was the point.", type:"manual" }},
+  { name:"Paolo Maldini", nickname:"If I have to tackle, I've already made a mistake", position:"Defender", suit:"♥", rank:10, rankLabel:"10", tekkers:85, shithousery:15, madness:8, clutch:88, vibes:78,
+    ability:{ name:"Positioning", desc:"Auto-draw this round. If you were already winning, it stays a win. Perfect positioning needs no effort.", type:"manual" }},
+  { name:"Romário", nickname:"1,000 goals. Most were tap-ins. All counted.", position:"Striker", suit:"♥", rank:9, rankLabel:"9", tekkers:88, shithousery:45, madness:42, clutch:85, vibes:72,
+    ability:{ name:"Fox in the Box", desc:"If the stat used is Clutch, Romário auto-wins. Always the right place. Always.", type:"manual" }},
+  { name:"Ferenc Puskás", nickname:"Left foot only. Left foot was enough.", position:"Striker", suit:"♥", rank:8, rankLabel:"8", tekkers:88, shithousery:10, madness:15, clutch:82, vibes:78,
+    ability:{ name:"Puskás Award", desc:"If your Tekkers is 80+, gain +12 to ALL stats this round. The award is named after this man.", type:"manual" }},
+  { name:"Garrincha", nickname:"Born with dodgy legs. Dribbled past everyone anyway.", position:"Striker", suit:"♥", rank:7, rankLabel:"7", tekkers:92, shithousery:20, madness:70, clutch:65, vibes:88,
+    ability:{ name:"Crooked Genius", desc:"Randomize your Tekkers to 70-99. The opponent never knows which Garrincha is showing up.", type:"manual" }},
+  { name:"René Higuita", nickname:"The scorpion kick. Also got arrested while being a goalkeeper.", position:"Goalkeeper", suit:"♥", rank:6, rankLabel:"6", tekkers:62, shithousery:55, madness:92, clutch:35, vibes:88,
+    ability:{ name:"Scorpion Kick", desc:"If losing, 40% chance: spectacular save, you win. 60% chance: look ridiculous, lose an extra card.", type:"manual" }},
+  { name:"Carlos Valderrama", nickname:"The hair. THE HAIR. Also quite good at passing.", position:"Midfielder", suit:"♥", rank:5, rankLabel:"5", tekkers:78, shithousery:25, madness:45, clutch:55, vibes:92,
+    ability:{ name:"El Pibe", desc:"Vibes is always treated as your highest stat regardless of the number. You can't compete with that mane.", type:"manual" }},
+
+  // ♦ CHAOS & INCIDENT — here for what they did, not what they were
+  { name:"Rivaldo", nickname:"The face dive vs Turkey. Won a Ballon d'Or. Remembered for the dive.", position:"Striker", suit:"♦", rank:14, rankLabel:"A", tekkers:90, shithousery:78, madness:55, clutch:80, vibes:72,
+    ability:{ name:"The Face Dive", desc:"If losing by 10 or less, Shithousery becomes 99 — you win. Bigger gap = ref saw it, opponent gets +10.", type:"manual" }},
+  { name:"Marco Materazzi", nickname:"What did you say to Zidane? WHAT DID YOU SAY?", position:"Defender", suit:"♦", rank:13, rankLabel:"K", tekkers:55, shithousery:95, madness:72, clutch:68, vibes:58,
+    ability:{ name:"The Whisper", desc:"Opponent's Madness doubles but becomes uncontrollable — random stat is used instead of what they chose.", type:"manual" }},
+  { name:"Sócrates", nickname:"A smoking doctor who captained Brazil while organising democracy", position:"Midfielder", suit:"♦", rank:12, rankLabel:"Q", tekkers:82, shithousery:15, madness:65, clutch:55, vibes:95,
+    ability:{ name:"Corinthian Democracy", desc:"Both reveal stats simultaneously. Higher Vibes picks which stat decides the round.", type:"manual" }},
+  { name:"José Luis Chilavert", nickname:"Goalscoring goalkeeper who started fistfights with strikers", position:"Goalkeeper", suit:"♦", rank:11, rankLabel:"J", tekkers:55, shithousery:72, madness:85, clutch:65, vibes:78,
+    ability:{ name:"Keeper Scores", desc:"Play Madness as attack. Win = take 2 cards. Lose = goal's empty, opponent takes 2 from you.", type:"manual" }},
+  { name:"Gerd Müller", nickname:"Der Bomber. 365 in 427. Not flashy. Just lethal.", position:"Striker", suit:"♦", rank:10, rankLabel:"10", tekkers:78, shithousery:8, madness:12, clutch:95, vibes:55,
+    ability:{ name:"Der Bomber", desc:"If Clutch is chosen, yours becomes 99 AND opponent's drops by 15. Nobody outclinches Gerd Müller.", type:"manual" }},
+  { name:"Pepe", nickname:"Stamps. Headbutts. Red cards. Still played until 40.", position:"Defender", suit:"♦", rank:9, rankLabel:"9", tekkers:65, shithousery:88, madness:92, clutch:75, vibes:48,
+    ability:{ name:"The Stamp", desc:"Opponent's highest stat reduced by 25. But 30% chance: red card, forfeit this round AND next.", type:"manual" }},
+  { name:"Nigel de Jong", nickname:"Chest-kicked Xabi Alonso in a World Cup final. Got a yellow.", position:"Midfielder", suit:"♦", rank:8, rankLabel:"8", tekkers:55, shithousery:72, madness:88, clutch:60, vibes:45,
+    ability:{ name:"Chest Kick", desc:"Madness becomes 99, opponent 'winded' — all their stats –10 next round. How was this not a red?", type:"manual" }},
+  { name:"Andoni Goikoetxea", nickname:"The Butcher of Bilbao. Broke Maradona's ankle. Kept the boot.", position:"Defender", suit:"♦", rank:7, rankLabel:"7", tekkers:45, shithousery:85, madness:90, clutch:55, vibes:42,
+    ability:{ name:"The Butcher", desc:"If opponent's highest stat is 85+, reduce it to 50. He kept the boot on his mantelpiece.", type:"manual" }},
+  { name:"Frank Rijkaard", nickname:"World-class player. Remembered for spitting in Völler's hair.", position:"Midfielder", suit:"♦", rank:6, rankLabel:"6", tekkers:82, shithousery:62, madness:45, clutch:70, vibes:55,
+    ability:{ name:"The Spit", desc:"Opponent's Vibes drops to 5 (nobody wants to be near you). Your Shithousery becomes 90.", type:"manual" }},
+  { name:"Roger Milla", nickname:"Corner flag dance at 42 in a World Cup. Cameroon's king.", position:"Striker", suit:"♦", rank:5, rankLabel:"5", tekkers:68, shithousery:35, madness:45, clutch:72, vibes:95,
+    ability:{ name:"Corner Flag Dance", desc:"If you win, Vibes becomes 99 for the NEXT round too. The celebration IS the weapon.", type:"manual" }},
+
+  // ♣ WILDCARDS & MEMES — the beautiful chaos tier
+  { name:"Brandi Chastain", nickname:"Shirt off, '99 final. Changed everything.", position:"Defender", suit:"♣", rank:14, rankLabel:"A", tekkers:65, shithousery:25, madness:55, clutch:92, vibes:88,
+    ability:{ name:"The Shirt", desc:"If played in the final 5 rounds, ALL stats gain +15. Pressure makes diamonds.", type:"manual" }},
+  { name:"Jürgen Klinsmann", nickname:"Dived so much his celebration was a dive. Then scored 20.", position:"Striker", suit:"♣", rank:13, rankLabel:"K", tekkers:75, shithousery:65, madness:40, clutch:72, vibes:82,
+    ability:{ name:"Dive Celebration", desc:"If you win, gain +5 to all stats next round (momentum). Lose = the dive is just a dive.", type:"manual" }},
+  { name:"Éric Djemba-Djemba", nickname:"So good they named him twice. So bad they sold him immediately.", position:"Midfielder", suit:"♣", rank:12, rankLabel:"Q", tekkers:35, shithousery:28, madness:55, clutch:20, vibes:90,
+    ability:{ name:"Named Twice", desc:"Play this card AND your next card simultaneously — two cards vs one. Quantity over quality.", type:"manual" }},
+  { name:"Tim Cahill", nickname:"Headed everything. Booked for every celebration.", position:"Midfielder", suit:"♣", rank:11, rankLabel:"J", tekkers:62, shithousery:45, madness:55, clutch:82, vibes:72,
+    ability:{ name:"Booking Magnet", desc:"If you win, +10 Vibes next round. But you get booked — one more booking = sent off (card discarded).", type:"manual" }},
+  { name:"Hasan Şaş", nickname:"Turkey 2002. That screamer vs South Korea.", position:"Midfielder", suit:"♣", rank:10, rankLabel:"10", tekkers:72, shithousery:35, madness:68, clutch:65, vibes:72,
+    ability:{ name:"Tournament Hero", desc:"If you've lost the previous 2 rounds, ALL stats gain +20. Heroes emerge from desperation.", type:"manual" }},
+  { name:"Loris Karius", nickname:"Two howlers. One Champions League final. A career in 90 minutes.", position:"Goalkeeper", suit:"♣", rank:9, rankLabel:"9", tekkers:45, shithousery:8, madness:65, clutch:8, vibes:62,
+    ability:{ name:"Butterfingers", desc:"If you win by less than 15, coin flip to keep the win. Lose = opponent takes an extra card.", type:"manual" }},
+  { name:"Essam El-Hadary", nickname:"Played in a World Cup aged 45. FORTY-FIVE.", position:"Goalkeeper", suit:"♣", rank:8, rankLabel:"8", tekkers:42, shithousery:15, madness:20, clutch:62, vibes:82,
+    ability:{ name:"Eternal", desc:"If you lose with El-Hadary, he goes back into your hand. He retires when HE says so.", type:"manual" }},
+  { name:"Saeed Al-Owairan", nickname:"Scored THAT goal vs Belgium at USA '94. Then vanished.", position:"Midfielder", suit:"♣", rank:7, rankLabel:"7", tekkers:68, shithousery:10, madness:55, clutch:60, vibes:72,
+    ability:{ name:"The Solo Run", desc:"Tekkers becomes 95 this round. All stats drop by 10 next round. One moment of immortality.", type:"manual" }},
+  { name:"Madjer", nickname:"The backheel in the '87 Intercontinental Cup final. Absurd.", position:"Striker", suit:"♣", rank:6, rankLabel:"6", tekkers:72, shithousery:20, madness:50, clutch:65, vibes:78,
+    ability:{ name:"The Backheel", desc:"Flip Tekkers and Clutch values. If new Tekkers is higher, gain +10 bonus.", type:"manual" }},
+  { name:"Toni Schumacher", nickname:"Nearly killed Battiston in 1982. Waited for the goal kick.", position:"Goalkeeper", suit:"♣", rank:5, rankLabel:"5", tekkers:62, shithousery:85, madness:78, clutch:72, vibes:15,
+    ability:{ name:"No Remorse", desc:"Opponent 'injured' — all stats –20 this round AND next round. The coldest card in the pack.", type:"manual" }},
+  { name:"Diana Ross", nickname:"Missed the penalty at the '94 World Cup opener. She's not a footballer. She's a legend.", position:"Striker", suit:"♣", rank:4, rankLabel:"4", tekkers:3, shithousery:10, madness:55, clutch:2, vibes:99,
+    ability:{ name:"Opening Ceremony", desc:"If Vibes is chosen, Diana wins. Any other stat = auto-lose. She's not a footballer. She's THE entertainer.", type:"manual" }},
+  { name:"Scott Carson", nickname:"Let the Pavlyuchenko shot through. On his England debut.", position:"Goalkeeper", suit:"♣", rank:3, rankLabel:"3", tekkers:35, shithousery:5, madness:55, clutch:12, vibes:52,
+    ability:{ name:"The Debut", desc:"Nerves — your Clutch drops to 5. But if the opponent plays a card ranked 8+, your adrenaline kicks in: all stats +15.", type:"manual" }},
+  { name:"Carlos Kaiser", nickname:"Never played a match. Had a 20-year career. The greatest fraud in football.", position:"Striker", suit:"♣", rank:2, rankLabel:"2", tekkers:2, shithousery:99, madness:85, clutch:1, vibes:95,
+    ability:{ name:"Career Fraud", desc:"If about to lose, fake an injury — round voided. Works once per game. He sustained this for 20 years.", type:"manual" }},
+];
+
+// Pack registry
+const PACKS = {
+  'prem': { name: 'Premier League', cards: ALL_CARDS, icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', desc: '52 PL legends & memes' },
+  'world': { name: 'World Legends', cards: PACK2_CARDS, icon: '🌍', desc: '43 global icons & chaos' },
+};
+let selectedPack = 'prem';
+
+// ═══════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════
 const STATS = ['tekkers','shithousery','madness','clutch','vibes'];
@@ -2333,6 +2470,50 @@ const WIKI_SEARCH_NAMES = {
   "Paolo Di Canio": "Paolo Di Canio",
   "Mario Balotelli": "Mario Balotelli",
   "Ali Dia": "Ali Dia",
+  // Pack 2: World Legends
+  "Diego Maradona": "Diego Maradona",
+  "Pelé": "Pelé",
+  "Lionel Messi": "Lionel Messi",
+  "Zinedine Zidane": "Zinedine Zidane",
+  "Ronaldinho": "Ronaldinho",
+  "Johan Cruyff": "Johan Cruyff",
+  "Franz Beckenbauer": "Franz Beckenbauer",
+  "Ronaldo Nazário": "Ronaldo (Brazilian footballer)",
+  "George Best": "George Best",
+  "Gianluigi Buffon": "Gianluigi Buffon",
+  "Neymar": "Neymar",
+  "Zlatan Ibrahimović": "Zlatan Ibrahimović",
+  "Roberto Carlos": "Roberto Carlos (footballer)",
+  "Andrea Pirlo": "Andrea Pirlo",
+  "Paolo Maldini": "Paolo Maldini",
+  "Romário": "Romário",
+  "Ferenc Puskás": "Ferenc Puskás",
+  "Garrincha": "Garrincha",
+  "René Higuita": "René Higuita",
+  "Carlos Valderrama": "Carlos Valderrama",
+  "Rivaldo": "Rivaldo",
+  "Marco Materazzi": "Marco Materazzi",
+  "Sócrates": "Sócrates (footballer)",
+  "José Luis Chilavert": "José Luis Chilavert",
+  "Gerd Müller": "Gerd Müller",
+  "Pepe": "Pepe (footballer, born 1983)",
+  "Nigel de Jong": "Nigel de Jong",
+  "Andoni Goikoetxea": "Andoni Goikoetxea Olaskoaga",
+  "Frank Rijkaard": "Frank Rijkaard",
+  "Roger Milla": "Roger Milla",
+  "Brandi Chastain": "Brandi Chastain",
+  "Jürgen Klinsmann": "Jürgen Klinsmann",
+  "Éric Djemba-Djemba": "Éric Djemba-Djemba",
+  "Tim Cahill": "Tim Cahill (footballer)",
+  "Hasan Şaş": "Hasan Şaş",
+  "Loris Karius": "Loris Karius",
+  "Essam El-Hadary": "Essam El-Hadary",
+  "Saeed Al-Owairan": "Saeed Al-Owairan",
+  "Madjer": "Rabah Madjer",
+  "Toni Schumacher": "Harald Schumacher",
+  "Diana Ross": "Diana Ross",
+  "Scott Carson": "Scott Carson",
+  "Carlos Kaiser": "Carlos Kaiser (footballer)",
 };
 
 // Local image map — uses generated images from images/ folder, falls back to Wikipedia
@@ -2392,13 +2573,15 @@ const LOCAL_IMAGES = {
 };
 
 async function fetchPlayerImages() {
+  // Apply to all packs
+  const allCards = [...ALL_CARDS, ...PACK2_CARDS];
   // First: apply local images
-  ALL_CARDS.forEach(c => {
+  allCards.forEach(c => {
     if (LOCAL_IMAGES[c.name]) c.img = LOCAL_IMAGES[c.name];
   });
 
   // Then: fetch remaining from Wikipedia for cards without local images
-  const missing = ALL_CARDS.filter(c => !c.img);
+  const missing = allCards.filter(c => !c.img);
   if (missing.length === 0) return;
 
   const names = missing.map(c => WIKI_SEARCH_NAMES[c.name] || c.name);
@@ -3229,7 +3412,8 @@ function startGame() {
     document.getElementById('opponent-label').textContent = 'CPU Card';
   }
 
-  const fullDeck = shuffle(ALL_CARDS.map(c => ({...c, ability: {...c.ability}})));
+  const packCards = PACKS[selectedPack].cards;
+  const fullDeck = shuffle(packCards.map(c => ({...c, ability: {...c.ability}})));
 
   // DRAFT PHASE — player and CPU pick starting cards
   startDraft(fullDeck, (playerPicks, cpuPicks, remaining) => {
