@@ -522,22 +522,25 @@ body {
   min-height: 1.5em;
 }
 
-/* Ability badge on card */
+/* Ability badge on card — SUPERPOWER HERO */
 .card-ability {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(0.48rem, 1.1vw, 0.56rem);
+  font-size: clamp(0.6rem, 1.4vw, 0.75rem);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   color: var(--gold);
-  background: rgba(212,175,55,0.1);
-  border: 1px solid rgba(212,175,55,0.25);
-  border-radius: 3px;
-  padding: 0.15rem 0.35rem;
-  margin-bottom: 0.3rem;
+  background: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(212,175,55,0.06));
+  border: 2px solid rgba(212,175,55,0.4);
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.35rem;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 0 8px rgba(212,175,55,0.3);
+  animation: abilityGlow 2s ease infinite;
 }
 
 .card-stats {
@@ -645,7 +648,7 @@ body {
   transform: scale(0.95);
 }
 
-/* ── ABILITY BUTTON (SUPERPOWER) — BIG & UNMISSABLE ── */
+/* ── ABILITY BUTTON (SUPERPOWER) — THE HERO ── */
 .ability-btn {
   display: none;
   font-family: 'Oswald', sans-serif;
@@ -1513,24 +1516,36 @@ body.shake { animation: shake 0.5s ease; }
   <div class="gate-presents">ACFC presents</div>
   <div class="gate-title">GAFFER<sup>26</sup></div>
   <div class="gate-tap">Tap to begin</div>
-  <div id="gate-menu" style="display:none; position:relative; z-index:2; opacity:0; transition: opacity 0.8s ease; width:100%; max-width:450px; padding:0 1.5rem">
-    <div style="margin-top:0.5rem; background:rgba(212,175,55,0.06); border:2px solid rgba(212,175,55,0.2); border-radius:12px; padding:1rem 1.2rem; text-align:left">
-      <div style="font-family:'Oswald',sans-serif; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:0.5rem; text-align:center">How to Play</div>
-      <div style="font-size:0.8rem; color:#bbb; line-height:1.7">
-        <div style="margin-bottom:0.4rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">1.</span><span>Draft your squad — pick 5 legends from the pool</span></div>
-        <div style="margin-bottom:0.4rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">2.</span><span>Play a card, then choose your strongest stat</span></div>
-        <div style="margin-bottom:0.4rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">3.</span><span>Win the round — highest stat wins the cards!</span></div>
-      </div>
-      <div style="margin-top:0.6rem; background:rgba(212,175,55,0.1); border:2px solid var(--gold); border-radius:8px; padding:0.6rem 0.8rem; text-align:center; animation:spCallout 1.5s ease infinite">
-        <div style="font-family:'Oswald',sans-serif; font-size:0.9rem; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.2rem">SUPERPOWER</div>
-        <div style="font-size:0.75rem; color:#ddd; line-height:1.4">Every card has a <strong style="color:var(--gold)">unique superpower</strong> — tap the <strong style="color:#fff">glowing button</strong> to unleash it!</div>
-        <div style="font-size:0.7rem; color:#e74c3c; font-weight:600; margin-top:0.3rem">Only 3 per game — choose your moment!</div>
+  <div id="gate-menu" style="display:none; position:relative; z-index:2; opacity:0; transition: opacity 0.8s ease; width:100%; max-width:900px; padding:0 1.5rem">
+
+    <!-- SUPERPOWER HERO SECTION — center stage -->
+    <div style="margin-top:0.8rem; background:linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03)); border:3px solid var(--gold); border-radius:16px; padding:1.5rem 2rem; text-align:center; animation:spCallout 1.5s ease infinite; box-shadow:0 0 40px rgba(212,175,55,0.08), inset 0 0 30px rgba(212,175,55,0.04); position:relative; overflow:hidden">
+      <div style="position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(212,175,55,0.06) 0%, transparent 70%); pointer-events:none"></div>
+      <div style="font-family:'Oswald',sans-serif; font-size:clamp(1.8rem, 4vw, 2.8rem); font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.2em; margin-bottom:0.5rem; text-shadow:0 0 30px rgba(212,175,55,0.4); position:relative">⚡ SUPERPOWERS ⚡</div>
+      <div style="font-size:clamp(0.9rem, 2vw, 1.1rem); color:#eee; line-height:1.6; max-width:600px; margin:0 auto; position:relative">Every card has a <strong style="color:var(--gold); font-size:1.1em">unique superpower</strong> — tap the <strong style="color:#fff">glowing button</strong> during battle to unleash it!</div>
+      <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1rem; position:relative">
+        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; color:#ddd">🎯 <strong style="color:var(--gold)">3 per game</strong> — choose your moment</div>
+        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; color:#ddd">⚡ <strong style="color:var(--gold)">52 unique powers</strong> — no two alike</div>
+        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; color:#ddd">🔥 <strong style="color:var(--gold)">Game-changers</strong> — turn losses into wins</div>
       </div>
     </div>
-    <div style="margin-top:1rem; display:flex; flex-direction:column; align-items:center; gap:0.5rem">
-      <label style="font-family:'Oswald',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#555">Enter Your Name</label>
-      <input type="text" id="gate-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.1rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:200px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
+
+    <!-- HOW TO PLAY + NAME — widescreen side-by-side -->
+    <div style="margin-top:1rem; display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; align-items:stretch">
+      <div style="flex:1; min-width:260px; max-width:420px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:1rem 1.2rem; text-align:left">
+        <div style="font-family:'Oswald',sans-serif; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:0.5rem; text-align:center">How to Play</div>
+        <div style="font-size:0.85rem; color:#bbb; line-height:1.8">
+          <div style="margin-bottom:0.3rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">1.</span><span>Draft your squad — pick 5 legends from the pool</span></div>
+          <div style="margin-bottom:0.3rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">2.</span><span>Play a card, then choose your strongest stat</span></div>
+          <div style="display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">3.</span><span>Win the round — highest stat wins the cards!</span></div>
+        </div>
+      </div>
+      <div style="flex:0 0 auto; min-width:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.8rem">
+        <label style="font-family:'Oswald',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#555">Enter Your Name</label>
+        <input type="text" id="gate-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.1rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:200px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
+      </div>
     </div>
+
     <!-- PACK SELECTION -->
     <div style="margin-top:1rem; display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap" id="pack-selector">
       <button class="btn-deal pack-btn pack-active" data-pack="prem" onclick="selectPack('prem')" style="font-size:0.85rem; padding:0.5rem 1.2rem; margin-top:0; border-width:2px; letter-spacing:0.05em; display:flex; align-items:center; gap:0.4rem">
@@ -1542,9 +1557,10 @@ body.shake { animation: shake 0.5s ease; }
     </div>
     <div id="pack-desc" style="font-size:0.65rem; color:#666; text-align:center; margin-top:0.3rem; font-style:italic">52 PL legends & memes</div>
 
-    <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:1rem">
-      <button class="btn-deal" onclick="startFromGate('cpu')" style="font-size:1.3rem; padding:1rem 2.5rem; margin-top:0; border-width:3px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700">vs CPU</button>
-      <button class="btn-deal" onclick="showPvPSetup()" style="font-size:1.3rem; padding:1rem 2.5rem; margin-top:0; border-color:#4a90d9; color:#4a90d9; border-width:3px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700">vs Player</button>
+    <!-- PLAY BUTTONS — prominent -->
+    <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; margin-top:1.2rem">
+      <button class="btn-deal" onclick="startFromGate('cpu')" style="font-size:1.4rem; padding:1rem 3rem; margin-top:0; border-width:3px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; box-shadow:0 0 20px rgba(212,175,55,0.15)">⚔️ vs CPU</button>
+      <button class="btn-deal" onclick="showPvPSetup()" style="font-size:1.4rem; padding:1rem 3rem; margin-top:0; border-color:#4a90d9; color:#4a90d9; border-width:3px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; box-shadow:0 0 20px rgba(74,144,217,0.15)">👥 vs Player</button>
     </div>
     <div style="display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center; margin-top:0.8rem">
       <button class="btn-deal" onclick="showLeaderboard()" style="font-size:0.75rem; padding:0.4rem 1.2rem; margin-top:0; opacity:0.5">Leaderboard</button>
@@ -1847,6 +1863,12 @@ function removeInteractionListeners() {
   document.removeEventListener('pointerdown', startMusicOnInteraction);
 }
 
+// Register interaction listeners immediately so music starts on ANY first touch/click/key
+document.addEventListener('click', startMusicOnInteraction);
+document.addEventListener('touchstart', startMusicOnInteraction);
+document.addEventListener('keydown', startMusicOnInteraction);
+document.addEventListener('pointerdown', startMusicOnInteraction);
+
 // ── SPLASH → MENU FLOW ──
 // Single screen: splash shows ACFC presents GAFFER26 with particles
 // Tap reveals menu (how-to-play, name, buttons) on same screen
@@ -1980,6 +2002,10 @@ function startFromGate(mode) {
 // ── CINEMATIC INTRO FLOW ──
 (function initSplash() {
   const splash = document.getElementById('splash-overlay');
+
+  // Try to start music immediately when logo appears (may be blocked by browser autoplay policy)
+  // This fires as soon as the splash is visible — before any user interaction
+  try { ensureMusic(); } catch(e) {}
 
   // Returning visitor this session — skip to menu
   if (sessionStorage.getItem('gaffer26-intro-seen')) {
@@ -3014,7 +3040,8 @@ function renderCard(card, el, mods) {
       </div>`;
   });
 
-  const imgHTML = card.img ? `<div class="card-photo-wrapper"><img class="card-photo" src="${card.img}" alt="${card.name}" loading="lazy" onload="this.dataset.loaded='true'" onerror="this.style.display='none'"></div>` : `<div class="card-photo-wrapper"></div>`;
+  const initials = card.name.split(' ').map(w => w[0]).join('').toUpperCase();
+  const imgHTML = card.img ? `<div class="card-photo-wrapper"><img class="card-photo" src="${card.img}" alt="${card.name}" loading="lazy" onload="this.dataset.loaded='true'" onerror="this.onerror=null;this.style.display='none';this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:Oswald,sans-serif;font-size:1.8rem;font-weight:700;color:${color};opacity:0.3;text-shadow:0 0 10px ${color}\\'>${initials}</div>';"></div>` : `<div class="card-photo-wrapper"><div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:'Oswald',sans-serif;font-size:1.8rem;font-weight:700;color:${color};opacity:0.3;text-shadow:0 0 10px ${color}">${initials}</div></div>`;
 
   el.innerHTML = `
     <div class="card-header">
