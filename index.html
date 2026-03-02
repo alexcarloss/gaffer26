@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GAFFER26 — ACFC presents</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="music/1960s-house.mp3" as="audio">
 <style>
 /* Fallback: ensure text is visible even before Google Fonts load */
 @font-face { font-family: 'Oswald'; font-display: swap; }
@@ -161,10 +162,14 @@ body {
 #splash-overlay .gate-tap {
   position: absolute; bottom: 3rem;
   font-family: 'Oswald', sans-serif;
-  font-size: 0.65rem; text-transform: uppercase;
-  letter-spacing: 0.4em; color: rgba(255,255,255,0.2);
+  font-size: 0.85rem; text-transform: uppercase;
+  letter-spacing: 0.4em; color: rgba(212,175,55,0.5);
   z-index: 2; opacity: 0;
-  animation: gatePulse 2s ease 0.4s infinite;
+  animation: gatePulse 1.5s ease 0.4s infinite;
+  cursor: pointer;
+  padding: 0.8rem 2rem;
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 4px;
 }
 @keyframes gateReveal {
   0% { opacity: 0; transform: scale(0.85); filter: drop-shadow(0 0 0 rgba(212,175,55,0)); }
@@ -192,7 +197,7 @@ body {
   position: fixed;
   top: 0.6rem;
   right: 0.6rem;
-  z-index: 150;
+  z-index: 500;
   font-family: 'Oswald', sans-serif;
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -318,7 +323,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
+  gap: 0.5rem;
   min-height: 0;
   position: relative;
   z-index: 10;
@@ -350,7 +355,8 @@ body {
 .card-wrapper {
   perspective: 800px;
   width: clamp(180px, 32vw, 280px);
-  height: clamp(370px, 60vw, 500px);
+  height: clamp(300px, 55vh, 500px);
+  transition: height 0.3s ease;
 }
 
 .card {
@@ -455,7 +461,7 @@ body {
 .card-photo-wrapper {
   width: calc(100% + 2rem);
   margin-left: -1rem;
-  height: clamp(120px, 28vw, 210px);
+  height: clamp(80px, 28vw, 210px);
   border-radius: 0;
   margin-top: 0.15rem;
   margin-bottom: 0.25rem;
@@ -464,7 +470,7 @@ body {
   border-top: 1px solid rgba(212,175,55,0.2);
   border-bottom: 1px solid rgba(212,175,55,0.2);
   background: rgba(255,255,255,0.03);
-  flex-shrink: 0;
+  flex-shrink: 1;
   position: relative;
 }
 
@@ -511,6 +517,9 @@ body {
   text-transform: uppercase;
   line-height: 1.15;
   margin-bottom: 0.1rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .card-nickname {
@@ -550,28 +559,33 @@ body {
 }
 
 .stat-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.2em auto 1fr 2.2ch;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0 0.3rem;
+  min-height: 0;
 }
 
-.stat-icon { font-size: clamp(0.6rem, 1.5vw, 0.75rem); width: 1.2em; text-align: center; flex-shrink: 0; }
+.stat-icon {
+  font-size: clamp(0.55rem, 1.2vw, 0.65rem);
+  line-height: 1;
+}
 .stat-label {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(0.48rem, 1.2vw, 0.6rem);
+  font-size: clamp(0.5rem, 1.2vw, 0.62rem);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: #aaa;
-  width: 4em;
-  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .stat-bar-bg {
-  flex: 1;
   height: clamp(8px, 2vw, 11px);
   background: #1a1a25;
   border-radius: 2px;
   overflow: hidden;
+  min-width: 0;
 }
 
 .stat-bar-fill {
@@ -583,11 +597,10 @@ body {
 
 .stat-value {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(0.55rem, 1.3vw, 0.7rem);
+  font-size: clamp(0.58rem, 1.3vw, 0.72rem);
   font-weight: 600;
-  width: 2ch;
   text-align: right;
-  flex-shrink: 0;
+  color: #ddd;
 }
 
 .stat-row.won .stat-bar-fill { background: var(--gold) !important; box-shadow: 0 0 8px rgba(212,175,55,0.5); }
@@ -610,7 +623,7 @@ body {
 
 .stat-buttons.active { display: flex; }
 
-/* When stat buttons are visible, dim hand cards and push them back */
+/* When stat buttons are visible, dim hand cards and shrink cards to fit */
 #game-screen:has(.stat-buttons.active) .hand-card {
   pointer-events: none;
   opacity: 0.35;
@@ -619,6 +632,26 @@ body {
 #game-screen:has(.stat-buttons.active) .hand-area {
   z-index: 0;
   position: relative;
+}
+/* When stat buttons are active, scroll into view and compact the ability button */
+#game-screen:has(.stat-buttons.active) .play-area {
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding-top: 0.3rem;
+}
+/* Compact cards when stat buttons are visible so name stays visible */
+#game-screen:has(.stat-buttons.active) .card-wrapper {
+  height: clamp(260px, 45vh, 440px);
+}
+#game-screen:has(.stat-buttons.active) .card-photo-wrapper {
+  height: clamp(80px, 18vw, 160px);
+}
+#game-screen:has(.stat-buttons.active) .ability-btn {
+  padding: 0.5rem 1.5rem;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+}
+#game-screen:has(.stat-buttons.active) .ability-btn.active::before {
+  display: none;
 }
 
 .stat-btn {
@@ -663,11 +696,12 @@ body {
   cursor: pointer;
   border-radius: 12px;
   transition: all 0.2s;
-  margin-top: 0.6rem;
+  margin-top: 0.8rem;
   position: relative;
   z-index: 10;
   width: 90%;
   max-width: 360px;
+  overflow: visible;
 }
 
 .ability-btn.active {
@@ -679,7 +713,7 @@ body {
 .ability-btn.active::before {
   content: '⚡ TAP TO DEPLOY SUPERPOWER ⚡';
   position: absolute;
-  top: -2.2rem;
+  bottom: calc(100% + 0.3rem);
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Oswald', sans-serif;
@@ -1119,7 +1153,7 @@ body {
   position: fixed;
   bottom: 12px;
   right: 12px;
-  z-index: 200;
+  z-index: 500;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1202,11 +1236,103 @@ body.shake { animation: shake 0.5s ease; }
 
 #game-over .go-sub { font-size: 1rem; color: #888; margin-bottom: 2rem; }
 
+#game-over.victory .go-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  color: #ccc;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: subTextFadeIn 1s ease-out 0.8s forwards;
+}
+
+@keyframes subTextFadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 #game-over.victory h2 {
   background: linear-gradient(135deg, var(--gold-light), var(--gold));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: victoryPulse 1.5s ease infinite;
+  filter: drop-shadow(0 0 20px rgba(212,175,55,0.5));
+}
+
+@keyframes victoryPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(212,175,55,0.5)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 0 40px rgba(212,175,55,0.8)); }
+}
+
+#game-over.victory {
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, rgba(5,5,10,0.97) 70%);
+}
+
+.victory-confetti {
+  position: fixed;
+  top: -10px;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  animation: confettiFall 3s ease-in forwards;
+  pointer-events: none;
+  z-index: 201;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.victory-trophy {
+  font-size: clamp(4rem, 12vw, 8rem);
+  animation: trophyBounce 0.8s ease-out;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 30px rgba(212,175,55,0.6));
+}
+
+@keyframes trophyBounce {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(5deg); opacity: 1; }
+  80% { transform: scale(0.9) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Card dissolve-out animation before game over */
+@keyframes cardDissolve {
+  0% { opacity: 1; transform: scale(1); filter: blur(0); }
+  60% { opacity: 0.4; transform: scale(0.92); filter: blur(2px); }
+  100% { opacity: 0; transform: scale(0.8); filter: blur(8px); }
+}
+
+.card-dissolving .card-column {
+  animation: cardDissolve 0.8s ease-out forwards;
+}
+.card-dissolving .card-column:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+/* Whole game screen dissolve-out on victory */
+@keyframes gameScreenDissolve {
+  0% { opacity: 1; filter: blur(0); transform: scale(1); }
+  40% { opacity: 0.6; filter: blur(3px); transform: scale(0.98); }
+  100% { opacity: 0; filter: blur(12px); transform: scale(0.92); }
+}
+
+.game-screen-dissolving {
+  animation: gameScreenDissolve 1.2s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Victory dissolve-in for game-over screen */
+@keyframes victoryDissolveIn {
+  0% { opacity: 0; filter: blur(12px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+#game-over.victory-dissolve-in {
+  animation: victoryDissolveIn 1s ease-out forwards;
 }
 
 #game-over.defeat h2 { color: #e74c3c; }
@@ -1435,7 +1561,11 @@ body.shake { animation: shake 0.5s ease; }
 }
 .draft-card:hover { border-color: var(--gold); transform: translateY(-8px) scale(1.03); box-shadow: 0 6px 30px rgba(212,175,55,0.3); }
 .draft-card.picked { opacity: 0.3; pointer-events: none; border-color: #222; transform: scale(0.9); }
-.draft-card.cpu-picked { opacity: 0.3; pointer-events: none; border-color: #e74c3c; transform: scale(0.9); }
+.draft-card.cpu-picked { opacity: 0.3; pointer-events: none; transform: scale(0.9); }
+.draft-card.cpu-picked.pos-gk { border-color: var(--gk); }
+.draft-card.cpu-picked.pos-def { border-color: var(--def); }
+.draft-card.cpu-picked.pos-mid { border-color: var(--mid); }
+.draft-card.cpu-picked.pos-str { border-color: var(--str); }
 .draft-card .dc-name { font-family: 'Oswald',sans-serif; font-size: 0.95rem; text-transform: uppercase; text-align: center; color: #ccc; margin-top: 0.2rem; }
 .draft-card .dc-rank { font-family: 'Oswald',sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
 .draft-card .dc-suit { font-size: 1.3rem; }
@@ -1515,35 +1645,24 @@ body.shake { animation: shake 0.5s ease; }
   <canvas id="particle-canvas"></canvas>
   <div class="gate-presents">ACFC presents</div>
   <div class="gate-title">GAFFER<sup>26</sup></div>
-  <div class="gate-tap">Tap to begin</div>
+  <div class="gate-tap" style="cursor:pointer; animation: pulse 1.5s ease infinite">🔊 Tap to begin</div>
   <div id="gate-menu" style="display:none; position:relative; z-index:2; opacity:0; transition: opacity 0.8s ease; width:100%; max-width:900px; padding:0 1.5rem">
 
-    <!-- SUPERPOWER HERO SECTION — center stage -->
-    <div style="margin-top:0.8rem; background:linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03)); border:3px solid var(--gold); border-radius:16px; padding:1.5rem 2rem; text-align:center; animation:spCallout 1.5s ease infinite; box-shadow:0 0 40px rgba(212,175,55,0.08), inset 0 0 30px rgba(212,175,55,0.04); position:relative; overflow:hidden">
-      <div style="position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(212,175,55,0.06) 0%, transparent 70%); pointer-events:none"></div>
-      <div style="font-family:'Oswald',sans-serif; font-size:clamp(1.8rem, 4vw, 2.8rem); font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.2em; margin-bottom:0.5rem; text-shadow:0 0 30px rgba(212,175,55,0.4); position:relative">⚡ SUPERPOWERS ⚡</div>
-      <div style="font-size:clamp(0.9rem, 2vw, 1.1rem); color:#eee; line-height:1.6; max-width:600px; margin:0 auto; position:relative">Every card has a <strong style="color:var(--gold); font-size:1.1em">unique superpower</strong> — tap the <strong style="color:#fff">glowing button</strong> during battle to unleash it!</div>
-      <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1rem; position:relative">
-        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; color:#ddd">🎯 <strong style="color:var(--gold)">3 per game</strong> — choose your moment</div>
-        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; color:#ddd">⚡ <strong style="color:var(--gold)">52 unique powers</strong> — no two alike</div>
-        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; color:#ddd">🔥 <strong style="color:var(--gold)">Game-changers</strong> — turn losses into wins</div>
+    <!-- HOW TO PLAY — prominent, full-width -->
+    <div style="margin-top:1.2rem; max-width:520px; margin-left:auto; margin-right:auto; background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.2); border-radius:14px; padding:1.2rem 1.5rem; text-align:left">
+      <div style="font-family:'Oswald',sans-serif; font-size:1.1rem; text-transform:uppercase; letter-spacing:0.25em; color:var(--gold); margin-bottom:0.8rem; text-align:center; font-weight:700">How to Play</div>
+      <div style="font-size:0.9rem; color:#ccc; line-height:2">
+        <div style="margin-bottom:0.4rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.05rem; min-width:1.4rem">1.</span><span>Draft your squad — pick 5 legends from the pool</span></div>
+        <div style="margin-bottom:0.4rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.05rem; min-width:1.4rem">2.</span><span>Play a card, choose your strongest stat — highest wins!</span></div>
+        <div style="margin-bottom:0.4rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.05rem; min-width:1.4rem">3.</span><span>Win all the cards to become <strong style="color:var(--gold)">The Gaffer</strong></span></div>
+        <div style="margin-bottom:0.4rem; display:flex; gap:0.5rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1.05rem; min-width:1.4rem">4.</span><span>Each card has a ⚡ superpower — tap to activate it (costs 1 energy)</span></div>
       </div>
     </div>
 
-    <!-- HOW TO PLAY + NAME — widescreen side-by-side -->
-    <div style="margin-top:1rem; display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; align-items:stretch">
-      <div style="flex:1; min-width:260px; max-width:420px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:1rem 1.2rem; text-align:left">
-        <div style="font-family:'Oswald',sans-serif; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:0.5rem; text-align:center">How to Play</div>
-        <div style="font-size:0.85rem; color:#bbb; line-height:1.8">
-          <div style="margin-bottom:0.3rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">1.</span><span>Draft your squad — pick 5 legends from the pool</span></div>
-          <div style="margin-bottom:0.3rem; display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">2.</span><span>Play a card, then choose your strongest stat</span></div>
-          <div style="display:flex; gap:0.4rem; align-items:flex-start"><span style="color:var(--gold); font-weight:700; font-size:1rem; min-width:1.3rem">3.</span><span>Win the round — highest stat wins the cards!</span></div>
-        </div>
-      </div>
-      <div style="flex:0 0 auto; min-width:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.8rem">
-        <label style="font-family:'Oswald',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#555">Enter Your Name</label>
-        <input type="text" id="gate-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.1rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:200px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
-      </div>
+    <!-- ENTER NAME — below how to play -->
+    <div style="margin-top:0.8rem; display:flex; flex-direction:column; align-items:center; gap:0.5rem">
+      <label style="font-family:'Oswald',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.2em; color:#555">Enter Your Name</label>
+      <input type="text" id="gate-name-input" placeholder="THE GAFFER" maxlength="15" style="font-family:'Oswald',sans-serif; font-size:1.1rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.05); border:2px solid #333; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; text-align:center; width:200px; outline:none; border-radius:4px; transition:border-color 0.3s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='#333'">
     </div>
 
     <!-- PACK SELECTION -->
@@ -1588,11 +1707,9 @@ body.shake { animation: shake 0.5s ease; }
 
 <!-- HALF-TIME SCREEN -->
 <div id="halftime-screen" style="display:none; position:fixed; inset:0; z-index:350; background:rgba(5,5,10,0.97); flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem">
-  <div style="font-family:'Oswald',sans-serif; font-size:clamp(0.6rem,1.5vw,0.8rem); text-transform:uppercase; letter-spacing:0.4em; color:#555; margin-bottom:0.5rem">⏱️ Half-Time</div>
-  <h2 style="font-family:'Oswald',sans-serif; font-size:clamp(2rem,6vw,3.5rem); font-weight:700; text-transform:uppercase; background:linear-gradient(135deg,var(--gold-light),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:1rem" id="ht-title">HALF TIME</h2>
+  <h2 style="font-family:'Oswald',sans-serif; font-size:clamp(2rem,6vw,3.5rem); font-weight:700; text-transform:uppercase; background:linear-gradient(135deg,var(--gold-light),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:1rem" id="ht-title">⏱️ HALF TIME</h2>
   <div id="ht-stats" style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:1.5rem"></div>
   <div id="ht-twist" style="font-family:'Oswald',sans-serif; font-size:1rem; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem; max-width:500px"></div>
-  <button class="btn-deal" onclick="resumeFromHalfTime()" style="font-size:1rem; padding:0.6rem 2.5rem">Second Half →</button>
 </div>
 
 <!-- TRADE SCREEN (post-round card swap) -->
@@ -1746,7 +1863,7 @@ body.shake { animation: shake 0.5s ease; }
 <button class="exit-btn" id="exit-btn" onclick="goHome()">Exit</button>
 
 <!-- VOLUME CONTROL -->
-<div class="volume-control" id="volume-control" style="display:none">
+<div class="volume-control" id="volume-control" style="display:flex">
   <button class="vol-btn" id="vol-btn" onclick="toggleMusic()" title="Toggle music">🔊</button>
 </div>
 
@@ -1815,6 +1932,29 @@ let shuffledGameplayTracks = [];
 
 const audioCache = {};
 
+// ── Eagerly preload intro track and attempt immediate autoplay ──
+(function preloadIntro() {
+  const a = new Audio(MUSIC_TRACKS.intro);
+  a.preload = 'auto';
+  a.loop = true;
+  audioCache[MUSIC_TRACKS.intro] = a;
+  // Attempt autoplay immediately — will succeed if browser allows it
+  a.volume = 0.6;
+  const p = a.play();
+  if (p && p.then) {
+    p.then(() => {
+      musicConfirmed = true;
+      currentAudio = a;
+      currentTrack = MUSIC_TRACKS.intro;
+      musicPlaying = true;
+      musicVolume = 0.6;
+      document.getElementById('volume-control').style.display = 'flex';
+      removeInteractionListeners();
+      setTimeout(preloadTracks, 500);
+    }).catch(() => { /* blocked — interaction listeners will handle it */ });
+  }
+})();
+
 // ── Start music on first user interaction (reliable across all browsers) ──
 let musicStarted = false;
 let musicConfirmed = false; // true only after audio is actually playing audibly
@@ -1830,8 +1970,7 @@ function ensureMusic() {
     audioCache[introUrl] = audio;
   }
   audio.loop = true;
-  audio.currentTime = 0;
-  audio.volume = 0;
+  audio.volume = 0.6;
   const p = audio.play();
   if (p && p.then) {
     p.then(() => {
@@ -1840,7 +1979,6 @@ function ensureMusic() {
       currentTrack = introUrl;
       musicPlaying = true;
       musicVolume = 0.6;
-      fadeAudio(audio, 0, 0.6, 0.8);
       document.getElementById('volume-control').style.display = 'flex';
       removeInteractionListeners();
       setTimeout(preloadTracks, 500);
@@ -1850,24 +1988,51 @@ function ensureMusic() {
   }
 }
 
-// Start music on ANY first user interaction (click, tap, key)
+// Start music on ANY first user interaction (click, tap, key, mouse move)
 function startMusicOnInteraction() {
   if (musicConfirmed) return;
-  ensureMusic();
+  // Fast path: try playing the already-cached intro audio directly
+  const cached = audioCache[MUSIC_TRACKS.intro];
+  if (cached && cached.paused) {
+    cached.loop = true;
+    cached.volume = 0.6;
+    const p = cached.play();
+    if (p && p.then) {
+      p.then(() => {
+        musicConfirmed = true;
+        musicStarted = true;
+        currentAudio = cached;
+        currentTrack = MUSIC_TRACKS.intro;
+        musicPlaying = true;
+        musicVolume = 0.6;
+        document.getElementById('volume-control').style.display = 'flex';
+        removeInteractionListeners();
+        setTimeout(preloadTracks, 500);
+      }).catch(() => { ensureMusic(); });
+    }
+  } else {
+    ensureMusic();
+  }
 }
 
 function removeInteractionListeners() {
-  document.removeEventListener('click', startMusicOnInteraction);
-  document.removeEventListener('touchstart', startMusicOnInteraction);
-  document.removeEventListener('keydown', startMusicOnInteraction);
-  document.removeEventListener('pointerdown', startMusicOnInteraction);
+  document.removeEventListener('click', startMusicOnInteraction, true);
+  document.removeEventListener('touchstart', startMusicOnInteraction, true);
+  document.removeEventListener('keydown', startMusicOnInteraction, true);
+  document.removeEventListener('pointerdown', startMusicOnInteraction, true);
+  document.removeEventListener('mousemove', startMusicOnInteraction, true);
+  document.removeEventListener('touchmove', startMusicOnInteraction, true);
+  document.removeEventListener('scroll', startMusicOnInteraction, true);
 }
 
-// Register interaction listeners immediately so music starts on ANY first touch/click/key
-document.addEventListener('click', startMusicOnInteraction);
-document.addEventListener('touchstart', startMusicOnInteraction);
-document.addEventListener('keydown', startMusicOnInteraction);
-document.addEventListener('pointerdown', startMusicOnInteraction);
+// Register interaction listeners with capture:true so they fire ASAP
+document.addEventListener('click', startMusicOnInteraction, true);
+document.addEventListener('touchstart', startMusicOnInteraction, true);
+document.addEventListener('keydown', startMusicOnInteraction, true);
+document.addEventListener('pointerdown', startMusicOnInteraction, true);
+document.addEventListener('mousemove', startMusicOnInteraction, true);
+document.addEventListener('touchmove', startMusicOnInteraction, true);
+document.addEventListener('scroll', startMusicOnInteraction, true);
 
 // ── SPLASH → MENU FLOW ──
 // Single screen: splash shows ACFC presents GAFFER26 with particles
@@ -2000,14 +2165,15 @@ function startFromGate(mode) {
 })();
 
 // ── CINEMATIC INTRO FLOW ──
+// Shows "ACFC presents GAFFER26" intro card for 2.5 seconds, then reveals menu.
+// Tap during intro also starts music (browser autoplay policy) and speeds up reveal.
 (function initSplash() {
   const splash = document.getElementById('splash-overlay');
 
   // Try to start music immediately when logo appears (may be blocked by browser autoplay policy)
-  // This fires as soon as the splash is visible — before any user interaction
   try { ensureMusic(); } catch(e) {}
 
-  // Returning visitor this session — skip to menu
+  // Returning visitor this session — skip intro, show menu directly
   if (sessionStorage.getItem('gaffer26-intro-seen')) {
     document.getElementById('volume-control').style.display = 'flex';
     showGateMenu();
@@ -2015,22 +2181,27 @@ function startFromGate(mode) {
     return;
   }
 
+  let revealed = false;
   function revealMenu() {
-    splash.removeEventListener('click', revealMenu);
-    splash.removeEventListener('touchstart', revealMenu);
-    ensureMusic(); // User gesture — music starts reliably
+    if (revealed) return;
+    revealed = true;
+    splash.removeEventListener('click', onTap);
+    splash.removeEventListener('touchstart', onTap);
+    ensureMusic();
     sessionStorage.setItem('gaffer26-intro-seen', '1');
     document.getElementById('volume-control').style.display = 'flex';
     showGateMenu();
   }
 
-  splash.addEventListener('click', revealMenu);
-  splash.addEventListener('touchstart', revealMenu);
+  // Tap during intro starts music immediately (user gesture needed for autoplay)
+  function onTap() {
+    ensureMusic();
+  }
+  splash.addEventListener('click', onTap);
+  splash.addEventListener('touchstart', onTap);
 
-  // Failsafe: auto-reveal menu after 2.5s
-  setTimeout(() => {
-    if (!document.getElementById('gate-menu').style.display || document.getElementById('gate-menu').style.display === 'none') revealMenu();
-  }, 2500);
+  // Auto-reveal menu after 2.5s intro card
+  setTimeout(revealMenu, 2500);
 })();
 
 // ── EXIT / HOME — quit game and return to title ──
@@ -2316,7 +2487,7 @@ const ALL_CARDS = [
     ability:{ name:"Cut Inside", desc:"Wrong-foot them — swap Tekkers and Shithousery values, then gain +10 to whichever is now higher.", type:"manual" }},
   { name:"Jamie Vardy", nickname:"Chat shit get banged, non-league to champion", position:"Striker", suit:"♣", rank:6, rankLabel:"6", tekkers:62, shithousery:88, madness:72, clutch:82, vibes:90,
     ability:{ name:"Chat Shit", desc:"Get banged! Trash talk — opponent's stats all drop by 8. Shithousery becomes 99.", type:"manual" }},
-  { name:"Luis Suárez", nickname:"Biting, racism, genius", position:"Striker", suit:"♣", rank:5, rankLabel:"5", tekkers:92, shithousery:95, madness:78, clutch:82, vibes:55,
+  { name:"Luis Suárez", nickname:"Biting, brilliant, completely unhinged", position:"Striker", suit:"♣", rank:5, rankLabel:"5", tekkers:92, shithousery:95, madness:78, clutch:82, vibes:55,
     ability:{ name:"The Bite", desc:"Steal a card from the opponent's WON pile instead of playing the current round.", type:"manual" }},
   { name:"Paolo Di Canio", nickname:"The push on the ref, the volley, the salute", position:"Striker", suit:"♣", rank:4, rankLabel:"4", tekkers:85, shithousery:78, madness:88, clutch:55, vibes:82,
     ability:{ name:"The Volley", desc:"Spectacular technique — Tekkers becomes 98 but Clutch drops to 5.", type:"manual" }},
@@ -2437,6 +2608,7 @@ let selectedPack = 'prem';
 // ═══════════════════════════════════════════════════════════
 const STATS = ['tekkers','shithousery','madness','clutch','vibes'];
 const STAT_ICONS = { tekkers:'🎩', shithousery:'😈', madness:'🔥', clutch:'🎯', vibes:'✨' };
+const STAT_LABELS = { tekkers:'Tekkers', shithousery:'Shithousery', madness:'Madness', clutch:'Clutch', vibes:'Vibes' };
 const POS_CLASS = { Goalkeeper:'pos-gk', Defender:'pos-def', Midfielder:'pos-mid', Striker:'pos-str' };
 const POS_COLOR = { Goalkeeper:'var(--gk)', Defender:'var(--def)', Midfielder:'var(--mid)', Striker:'var(--str)' };
 
@@ -2668,7 +2840,7 @@ let state = {
   warsWon: 0,
   // ── NEW GAMEPLAY FEATURES ──
   roundNumber: 0,          // current round (1-based)
-  energy: 1,               // energy for abilities (replaces flat cap)
+  energy: 2,               // energy for abilities (replaces flat cap)
   maxEnergy: 5,            // energy cap
   isHighStakes: false,     // current round is high stakes
   highStakesDeclined: false, // player folded this round
@@ -2677,6 +2849,8 @@ let state = {
   streakBonus: 0,          // current streak stat bonus (0, +3, +5, +8)
   cpuDifficulty: 0,        // 0=casual 1=smart 2=ruthless (progressive)
   warLevel: 0,             // escalation level in current war chain
+  cpuEnergy: 2,            // CPU energy for superpowers (mirrors player system)
+  cpuMaxEnergy: 5,         // CPU energy cap
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -2764,14 +2938,14 @@ function updateMomentum() {
   if (!bar) return;
   const s = state.currentStreak;
   if (s >= 5) {
-    state.streakBonus = 8;
-    bar.innerHTML = '<span class="streak-fire">🔥🔥🔥</span> <span class="bonus-text">INFERNO +8 ALL STATS</span>';
+    state.streakBonus = 4;
+    bar.innerHTML = '<span class="streak-fire">🔥🔥🔥</span> <span class="bonus-text">INFERNO +4 ALL STATS</span>';
   } else if (s >= 3) {
-    state.streakBonus = 5;
-    bar.innerHTML = '<span class="streak-fire">🔥🔥</span> <span class="bonus-text">ON FIRE +5 ALL STATS</span>';
-  } else if (s >= 2) {
     state.streakBonus = 3;
-    bar.innerHTML = '<span class="streak-fire">🔥</span> <span class="bonus-text">HOT STREAK +3 ALL STATS</span>';
+    bar.innerHTML = '<span class="streak-fire">🔥🔥</span> <span class="bonus-text">ON FIRE +3 ALL STATS</span>';
+  } else if (s >= 2) {
+    state.streakBonus = 2;
+    bar.innerHTML = '<span class="streak-fire">🔥</span> <span class="bonus-text">HOT STREAK +2 ALL STATS</span>';
   } else {
     state.streakBonus = 0;
     bar.innerHTML = '';
@@ -2844,23 +3018,23 @@ function updateCPUDifficulty() {
 }
 
 function cpuPickBestCard() {
-  // CPU picks randomly from hand — no position bias
-  // Small bonus to avoid repeating the same position as last round
+  // CPU picks with strong position diversity — track last 3 positions played
+  const recent = state.recentCpuPositions || [];
+
+  // Count how many times each position appears in recent history
+  const recentCounts = {};
+  recent.forEach(p => { recentCounts[p] = (recentCounts[p] || 0) + 1; });
+
   const scored = state.cpuHand.map((c, i) => {
-    let score = Math.random() * 10;
-    // Avoid playing same position as last round
-    if (state.lastCpuPosition && c.position === state.lastCpuPosition) {
-      score -= 3;
-    }
+    let score = Math.random() * 5;
+    const timesRecent = recentCounts[c.position] || 0;
+    // Heavy penalty for positions played recently: -8 per recent occurrence
+    score -= timesRecent * 8;
+    // Bonus for positions NOT in recent history at all
+    if (timesRecent === 0) score += 5;
     return { i, score };
   });
   scored.sort((a, b) => b.score - a.score);
-
-  // Occasionally pick fully random (30% chance) to keep it unpredictable
-  if (Math.random() < 0.3) {
-    return Math.floor(Math.random() * state.cpuHand.length);
-  }
-
   return scored[0].i;
 }
 
@@ -2928,7 +3102,7 @@ async function showHalftime() {
     <div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:#e74c3c">${state.roundsLost}</div><div style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.15em">Lost</div></div>
     <div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:#aaa">${state.roundsDrawn}</div><div style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.15em">Draws</div></div>
     <div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:#4a90d9">${state.bestStreak}</div><div style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.15em">Best Streak</div></div>
-    <div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:${lead >= 0 ? 'var(--gold)' : '#e74c3c'}">${status}</div><div style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.15em">Status</div></div>
+    <div style="text-align:center"><div style="font-family:'Poppins',sans-serif;font-size:clamp(1rem,2.5vw,1.3rem);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:${lead >= 0 ? 'var(--gold)' : '#e74c3c'}">${status}</div><div style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.15em">Status</div></div>
   `;
 
   // Replace the single button with tactic choices
@@ -2940,10 +3114,6 @@ async function showHalftime() {
       <button class="btn-deal" onclick="pickHalftimeTactic('balanced')" style="font-size:0.85rem; padding:0.6rem 1.5rem; border-color:var(--gold); color:var(--gold)">⚖️ Balanced<br><span style="font-size:0.55rem;color:#888;-webkit-text-fill-color:#888">+2 All Stats<br>+1 Energy</span></button>
     </div>
   `;
-
-  // Remove the old "Second Half" button since tactics buttons replace it
-  const oldBtn = htEl.querySelector('button.btn-deal:last-child');
-  if (oldBtn && oldBtn.textContent.includes('Second Half')) oldBtn.style.display = 'none';
 
   // Switch to halftime music
   playHalftimeMusic();
@@ -3032,7 +3202,7 @@ function renderCard(card, el, mods) {
     statsHTML += `
       <div class="stat-row ${modClass}" data-stat="${s}">
         <span class="stat-icon">${STAT_ICONS[s]}</span>
-        <span class="stat-label">${s}</span>
+        <span class="stat-label">${STAT_LABELS[s]}</span>
         <div class="stat-bar-bg">
           <div class="stat-bar-fill" style="width:${val}%; background:${color}"></div>
         </div>
@@ -3043,11 +3213,13 @@ function renderCard(card, el, mods) {
   const initials = card.name.split(' ').map(w => w[0]).join('').toUpperCase();
   const imgHTML = card.img ? `<div class="card-photo-wrapper"><img class="card-photo" src="${card.img}" alt="${card.name}" loading="lazy" onload="this.dataset.loaded='true'" onerror="this.onerror=null;this.style.display='none';this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:Oswald,sans-serif;font-size:1.8rem;font-weight:700;color:${color};opacity:0.3;text-shadow:0 0 10px ${color}\\'>${initials}</div>';"></div>` : `<div class="card-photo-wrapper"><div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:'Oswald',sans-serif;font-size:1.8rem;font-weight:700;color:${color};opacity:0.3;text-shadow:0 0 10px ${color}">${initials}</div></div>`;
 
+  const ovr = Math.round((card.tekkers + card.shithousery + card.madness + card.clutch + card.vibes) / 5);
   el.innerHTML = `
     <div class="card-header">
       <span class="card-suit">${card.suit}</span>
       <span class="card-rank">${card.rankLabel}</span>
     </div>
+    <div class="card-ovr" style="position:absolute;top:0.3rem;right:0.5rem;font-family:'Oswald',sans-serif;font-size:clamp(0.6rem,1.5vw,0.75rem);color:#888;letter-spacing:0.05em"><span style="font-size:0.5em;color:#555;vertical-align:top">OVR</span> ${ovr}</div>
     <div class="card-position">${card.position}</div>
     ${imgHTML}
     <div class="card-name">${card.name}</div>
@@ -3140,36 +3312,36 @@ let draftState = {
 function startDraft(fullDeck, onComplete) {
   const shuffled = shuffle(fullDeck);
 
-  // Build rounds: Rounds 1-4 are position-specific (GK, DEF, MID, STR)
-  // Round 5 is free pick from any remaining position
+  // Build rounds: each round shows 4 cards, one from each position (GK, DEF, MID, STR)
+  // This ensures CPU can't end up with all one position type
   const rounds = [];
   const usedCards = new Set();
-  const positionOrder = ['Goalkeeper', 'Defender', 'Midfielder', 'Striker'];
+  const positions = ['Goalkeeper', 'Defender', 'Midfielder', 'Striker'];
 
-  // Rounds 1-4: pick from each position
-  for (let r = 0; r < 4; r++) {
-    const pos = positionOrder[r];
-    const posCards = shuffled.filter(c => c.position === pos && !usedCards.has(c));
+  // Pool cards by position
+  const pools = {};
+  for (const pos of positions) {
+    pools[pos] = shuffled.filter(c => c.position === pos);
+  }
+
+  for (let r = 0; r < DRAFT_ROUNDS; r++) {
     const roundCards = [];
-    for (let i = 0; i < 4 && posCards.length > 0; i++) {
-      const idx = Math.floor(Math.random() * posCards.length);
-      const card = posCards.splice(idx, 1)[0];
-      roundCards.push(card);
-      usedCards.add(card);
+    for (const pos of positions) {
+      const available = pools[pos].filter(c => !usedCards.has(c));
+      if (available.length > 0) {
+        const idx = Math.floor(Math.random() * available.length);
+        const card = available[idx];
+        roundCards.push(card);
+        usedCards.add(card);
+      }
+    }
+    // Shuffle the 4 cards so positions aren't always in the same order
+    for (let i = roundCards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [roundCards[i], roundCards[j]] = [roundCards[j], roundCards[i]];
     }
     rounds.push(roundCards);
   }
-
-  // Round 5: free pick from any position (mixed pool)
-  const freePool = shuffled.filter(c => !usedCards.has(c));
-  const freeRound = [];
-  for (let i = 0; i < 4 && freePool.length > 0; i++) {
-    const idx = Math.floor(Math.random() * freePool.length);
-    const card = freePool.splice(idx, 1)[0];
-    freeRound.push(card);
-    usedCards.add(card);
-  }
-  rounds.push(freeRound);
 
   // Everything not used in draft rounds
   const remaining = shuffled.filter(c => !usedCards.has(c));
@@ -3180,7 +3352,7 @@ function startDraft(fullDeck, onComplete) {
     roundCards: rounds[0] || [],
     playerPicks: [],
     cpuPicks: [],
-    isPlayerTurn: true,
+    isPlayerTurn: true, // Round 1 = player first, alternates each round
     remaining,
     onComplete,
   };
@@ -3194,6 +3366,9 @@ function startDraft(fullDeck, onComplete) {
   updateDraftInfo();
   renderDraftPool();
   renderDraftSquads();
+
+  // Round 1 is player first; even rounds (index 1,3) will be CPU first
+  // (handled in advanceDraftRound)
 }
 
 function updateDraftInfo() {
@@ -3201,12 +3376,10 @@ function updateDraftInfo() {
   const roundLabel = document.getElementById('draft-round-label');
   const roundNum = draftState.currentRound + 1;
   const totalRounds = DRAFT_ROUNDS;
-  const posLabels = ['Goalkeeper', 'Defender', 'Midfielder', 'Striker', 'Free Pick'];
-  const posLabel = posLabels[draftState.currentRound] || `Round ${roundNum}`;
-  roundLabel.textContent = `Round ${roundNum} of ${totalRounds} — ${posLabel}`;
+  roundLabel.textContent = `Round ${roundNum} of ${totalRounds}`;
 
   if (draftState.isPlayerTurn) {
-    el.textContent = roundNum <= 4 ? `Pick your ${posLabel}` : `Free pick — any position`;
+    el.textContent = `Pick a card — one from each position`;
     el.style.color = 'var(--gold)';
   } else {
     el.textContent = `CPU is picking...`;
@@ -3224,16 +3397,20 @@ function renderDraftPool() {
     const div = document.createElement('div');
     div.className = `draft-card ${posClass(card)}${picked ? (pickedByPlayer ? ' picked' : ' cpu-picked') : ''}`;
     const color = POS_COLOR[card.position] || '#888';
+    const draftOvr = Math.round((card.tekkers + card.shithousery + card.madness + card.clutch + card.vibes) / 5);
     div.innerHTML = `
-      <div class="dc-pos" style="color:${color}">${card.position}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="dc-pos" style="color:${color}">${card.position}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:0.7rem;color:#888"><span style="font-size:0.55em;color:#555">OVR</span> ${draftOvr}</div>
+      </div>
       <div style="font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;text-transform:uppercase;text-align:center;line-height:1.2">${card.name}</div>
       <div style="font-size:0.65rem;color:#999;font-style:italic;text-align:center;margin:0.2rem 0;line-height:1.2">${card.nickname || ''}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem 0.8rem;margin-top:0.4rem;font-size:0.75rem;color:#aaa">
-        <span>🎩 Tek <b style="color:#fff">${card.tekkers}</b></span>
-        <span>😈 Shit <b style="color:#fff">${card.shithousery}</b></span>
-        <span>🔥 Mad <b style="color:#fff">${card.madness}</b></span>
-        <span>🎯 Clu <b style="color:#fff">${card.clutch}</b></span>
-        <span>✨ Vib <b style="color:#fff">${card.vibes}</b></span>
+      <div style="display:grid;grid-template-columns:1.2em 1fr auto;gap:0.15rem 0.3rem;margin-top:0.4rem;font-size:0.7rem;color:#aaa;align-items:center;line-height:1.3">
+        <span>🎩</span><span>Tekkers</span><b style="color:#fff;text-align:right;min-width:1.6em;font-family:'Oswald',sans-serif">${card.tekkers}</b>
+        <span>😈</span><span>Shithousery</span><b style="color:#fff;text-align:right;min-width:1.6em;font-family:'Oswald',sans-serif">${card.shithousery}</b>
+        <span>🔥</span><span>Madness</span><b style="color:#fff;text-align:right;min-width:1.6em;font-family:'Oswald',sans-serif">${card.madness}</b>
+        <span>🎯</span><span>Clutch</span><b style="color:#fff;text-align:right;min-width:1.6em;font-family:'Oswald',sans-serif">${card.clutch}</b>
+        <span>✨</span><span>Vibes</span><b style="color:#fff;text-align:right;min-width:1.6em;font-family:'Oswald',sans-serif">${card.vibes}</b>
       </div>
       <div style="font-size:0.65rem;color:${color};margin-top:0.3rem;text-align:center" title="${card.ability.desc}">⚡ ${card.ability.name}</div>`;
     if (!picked && draftState.isPlayerTurn) {
@@ -3260,7 +3437,8 @@ function renderDraftSquads() {
 
   draftState.cpuPicks.forEach(card => {
     const div = document.createElement('div');
-    div.style.cssText = `padding:0.3rem 0.6rem;border:2px solid #e74c3c;border-radius:4px;font-size:0.7rem;color:#e74c3c;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.05em`;
+    const color = POS_COLOR[card.position] || '#888';
+    div.style.cssText = `padding:0.3rem 0.6rem;border:2px solid ${color};border-radius:4px;font-size:0.7rem;color:${color};font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.05em`;
     div.textContent = card.name.split(' ').pop();
     cEl.appendChild(div);
   });
@@ -3273,25 +3451,52 @@ async function draftPickCard(index) {
 
   draftState.playerPicks.push(card);
   screenFlash('gold', 150);
-
-  // CPU picks from remaining cards in this round
   draftState.isPlayerTurn = false;
   updateDraftInfo();
   renderDraftPool();
   renderDraftSquads();
 
-  await delay(800);
-  cpuDraftPick();
+  // Check if CPU already picked this round (CPU-first round)
+  const cpuPickedThisRound = draftState.roundCards.some(c => draftState.cpuPicks.includes(c));
+
+  if (cpuPickedThisRound) {
+    // CPU already picked first this round — player picked second, advance
+    await delay(400);
+    advanceDraftRound();
+  } else {
+    // Player picked first — CPU picks from remaining, then advance
+    await delay(800);
+    cpuDraftPick(true);
+  }
 }
 
-async function cpuDraftPick() {
-  // CPU picks randomly from remaining cards in this round
+async function cpuDraftPick(advanceAfter) {
+  // CPU picks available card with strong position-balancing
   const available = draftState.roundCards.filter(card =>
     !draftState.playerPicks.includes(card) && !draftState.cpuPicks.includes(card)
   );
 
   if (available.length > 0) {
-    const pick = available[Math.floor(Math.random() * available.length)];
+    // Count positions already drafted by CPU
+    const posCounts = {};
+    POSITIONS.forEach(p => { posCounts[p] = 0; });
+    draftState.cpuPicks.forEach(c => { posCounts[c.position]++; });
+    const minCount = Math.min(...Object.values(posCounts));
+
+    // Score cards: prioritize filling empty positions, then least-filled, then OVR
+    const scored = available.map(c => {
+      const ovr = (c.tekkers + c.shithousery + c.madness + c.clutch + c.vibes) / 5;
+      const count = posCounts[c.position];
+      // Massive bonus for positions CPU has zero of; big bonus for under-represented
+      let posBonus = 0;
+      if (count === 0) posBonus = 50;          // must-fill empty position
+      else if (count === minCount) posBonus = 20; // prefer least-drafted position
+      else posBonus = -10;                        // discourage doubling up
+      return { card: c, score: ovr + posBonus };
+    }).sort((a, b) => b.score - a.score);
+
+    // Always pick best position-balanced option — no randomness here
+    const pick = scored[0].card;
     draftState.cpuPicks.push(pick);
     screenFlash('red', 100);
   }
@@ -3299,9 +3504,20 @@ async function cpuDraftPick() {
   renderDraftPool();
   renderDraftSquads();
 
-  // Short pause to show CPU's pick, then advance round
-  await delay(600);
+  if (advanceAfter) {
+    // CPU picked second — advance to next round
+    await delay(600);
+    advanceDraftRound();
+  } else {
+    // CPU picked first — now it's player's turn to pick from remaining
+    await delay(600);
+    draftState.isPlayerTurn = true;
+    updateDraftInfo();
+    renderDraftPool();
+  }
+}
 
+async function advanceDraftRound() {
   draftState.currentRound++;
 
   // Check if draft is complete
@@ -3309,11 +3525,18 @@ async function cpuDraftPick() {
     return completeDraft();
   }
 
-  // Set up next round
+  // Set up next round — alternate who picks first (snake draft)
   draftState.roundCards = draftState.rounds[draftState.currentRound];
-  draftState.isPlayerTurn = true;
+  const cpuPicksFirst = (draftState.currentRound % 2 === 1); // rounds 1,3 = CPU first; 0,2,4 = player first
+  draftState.isPlayerTurn = !cpuPicksFirst;
   updateDraftInfo();
   renderDraftPool();
+
+  // If CPU picks first this round, trigger their pick
+  if (cpuPicksFirst) {
+    await delay(800);
+    cpuDraftPick(false); // false = don't advance, wait for player to pick
+  }
 }
 
 function completeDraft() {
@@ -3477,7 +3700,7 @@ function startGame() {
       pendingScore: null,
       // ── NEW ──
       roundNumber: 0,
-      energy: 1,
+      energy: 2,
       maxEnergy: 5,
       isHighStakes: false,
       highStakesDeclined: false,
@@ -3486,7 +3709,10 @@ function startGame() {
       streakBonus: 0,
       cpuDifficulty: 0,
       warLevel: 0,
+      cpuEnergy: 2,
+      cpuMaxEnergy: 5,
       lastCpuPosition: null,
+      recentCpuPositions: [],  // track last 3 CPU positions for diversity
     };
 
     // Show the game screen
@@ -3505,6 +3731,9 @@ function startGame() {
 }
 
 async function nextRound() {
+  // Safety: always clear any lingering banner
+  hideBanner();
+
   // Check end conditions
   const pc = totalCards('player');
   const cc = totalCards('cpu');
@@ -3600,6 +3829,12 @@ async function selectCard(index) {
   setTurn(`Pick a stat — opponent card is hidden!${hsLabel}`);
   document.getElementById('stat-buttons').classList.add('active');
 
+  // Scroll the play area to show cards + stat buttons together
+  setTimeout(() => {
+    const playArea = document.querySelector('.play-area');
+    if (playArea) playArea.scrollTop = 0;
+  }, 100);
+
   // Show ability button if available
   showAbilityButton();
 }
@@ -3625,10 +3860,9 @@ function showAbilityButton() {
   // Flash the turn indicator to draw attention to the superpower
   const turnEl = document.getElementById('turn-indicator');
   if (turnEl) {
-    turnEl.innerHTML = `<span style="animation:spBlink 0.4s ease 8">⚡ SUPERPOWER READY ⚡</span><br><span style="font-size:0.8em">${card.ability.name} — tap the big button below!</span>`;
+    turnEl.innerHTML = `<span style="animation:spBlink 0.4s ease 8;font-size:0.7em">⚡ SUPERPOWER READY — ${card.ability.name} ⚡</span>`;
     turnEl.style.color = 'var(--gold)';
-    turnEl.style.fontSize = '1.1em';
-    setTimeout(() => { turnEl.style.color = ''; turnEl.style.fontSize = ''; }, 3000);
+    setTimeout(() => { turnEl.style.color = ''; }, 3000);
   }
 
   // Play a short attention sound
@@ -3667,8 +3901,9 @@ async function pickStat(stat) {
 
   await showCommentary(state.cpuCard, false);
 
-  // CPU might use ability (comeback or random)
-  if (state.comebackCPU || Math.random() < 0.3) {
+  // CPU might use ability (requires energy — mirrors player system)
+  if (state.cpuEnergy > 0 && (state.comebackCPU || Math.random() < 0.35)) {
+    state.cpuEnergy--;
     await applyCPUAbility();
   }
 
@@ -3690,6 +3925,7 @@ async function cpuSelectCard() {
 
   state.cpuCard = state.cpuHand.splice(pick, 1)[0];
   state.lastCpuPosition = state.cpuCard.position;
+  state.recentCpuPositions = [...(state.recentCpuPositions || []), state.cpuCard.position].slice(-3);
 
   // Show CPU card face-down first, then flip
   document.getElementById('cpu-card').classList.remove('flipped');
@@ -3700,8 +3936,9 @@ async function cpuSelectCard() {
   playCardSound(state.cpuCard);
   await showCommentary(state.cpuCard, false);
 
-  // CPU might use ability
-  if (state.comebackCPU || Math.random() < 0.3) {
+  // CPU might use ability (requires energy — mirrors player system)
+  if (state.cpuEnergy > 0 && (state.comebackCPU || Math.random() < 0.35)) {
+    state.cpuEnergy--;
     await applyCPUAbility();
   }
 
@@ -3785,10 +4022,11 @@ function cpuPlayCard() {
   }
   if (state.cpuHand.length === 0) return;
 
-  // CPU picks randomly (they don't know what stat was chosen yet)
-  const pick = Math.floor(Math.random() * state.cpuHand.length);
+  // CPU picks with position diversity (they don't know what stat was chosen yet)
+  const pick = cpuPickBestCard();
   state.cpuCard = state.cpuHand.splice(pick, 1)[0];
   state.lastCpuPosition = state.cpuCard.position;
+  state.recentCpuPositions = [...(state.recentCpuPositions || []), state.cpuCard.position].slice(-3);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3831,7 +4069,7 @@ async function activateAbility(auto = false) {
       if (state.cpuCard) {
         let best = 'pace', bv = 0;
         STATS.forEach(s => { if (state.cpuCard[s] > bv) { bv = state.cpuCard[s]; best = s; } });
-        cm[best] = (cm[best] || state.cpuCard[best]) - 20;
+        cm[best] = (cm[best] || state.cpuCard[best]) - 8;
       }
       break;
 
@@ -3841,7 +4079,7 @@ async function activateAbility(auto = false) {
 
     case 'Unhinged':
       if (state.cpuCard) {
-        STATS.forEach(s => { cm[s] = (cm[s] || state.cpuCard[s]) - 10; });
+        STATS.forEach(s => { cm[s] = (cm[s] || state.cpuCard[s]) - 4; });
       }
       break;
 
@@ -3864,17 +4102,17 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Long Bomb':
-      pm.shithousery = 92;
+      pm.shithousery = Math.min((pm.shithousery || p.shithousery) + 12, 92);
       break;
 
     case 'Name Power':
       { let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((pm[s] || p[s]) > bv) { bv = pm[s] || p[s]; best = s; } });
-        pm[best] = (pm[best] || p[best]) + 15; }
+        pm[best] = (pm[best] || p[best]) + 6; }
       break;
 
     case 'Goal Kick':
-      pm.shithousery = 85;
+      pm.shithousery = Math.min((pm.shithousery || p.shithousery) + 10, 85);
       break;
 
     case 'Twitter Rant':
@@ -3894,7 +4132,7 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Rolls Royce':
-      STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 8; });
+      STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 3; });
       break;
 
     case 'Full Kit':
@@ -3902,7 +4140,7 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Air Rifle':
-      pm.tekkers = (pm.tekkers || p.tekkers) + 15;
+      pm.tekkers = (pm.tekkers || p.tekkers) + 6;
       state.abilityActive = { type: 'discard-on-win' };
       break;
 
@@ -3911,15 +4149,15 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Psycho':
-      pm.madness = (pm.madness || p.madness) + 20;
-      pm.clutch = (pm.clutch || p.clutch) - 15;
+      pm.madness = (pm.madness || p.madness) + 8;
+      pm.clutch = (pm.clutch || p.clutch) - 6;
       break;
 
     case 'The Grab':
       if (state.cpuCard) {
         let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((cm[s] || state.cpuCard[s]) > bv) { bv = cm[s] || state.cpuCard[s]; best = s; } });
-        cm[best] = (cm[best] || state.cpuCard[best]) - 25;
+        cm[best] = (cm[best] || state.cpuCard[best]) - 10;
       }
       break;
 
@@ -3937,7 +4175,7 @@ async function activateAbility(auto = false) {
 
     case 'The Stare':
       if (state.cpuCard) {
-        STATS.forEach(s => { cm[s] = (cm[s] || state.cpuCard[s]) - 12; });
+        STATS.forEach(s => { cm[s] = (cm[s] || state.cpuCard[s]) - 5; });
       }
       break;
 
@@ -3946,7 +4184,7 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Big Laugh':
-      pm.vibes = 99;
+      pm.vibes = Math.min((pm.vibes || p.vibes) + 15, 99);
       break;
 
     case 'Walking Disaster':
@@ -3954,13 +4192,13 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Dentist\'s Chair':
-      STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 10; });
+      STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 4; });
       state.abilityActive = { type: 'extra-loss-penalty' };
       break;
 
     case 'Free Kick':
-      pm.tekkers = 99;
-      pm.clutch = 99;
+      pm.tekkers = Math.min((pm.tekkers || p.tekkers) + 15, 99);
+      pm.clutch = Math.min((pm.clutch || p.clutch) + 15, 99);
       break;
 
     case 'The Slip':
@@ -3968,7 +4206,7 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Ghost Goal':
-      pm.clutch = 95;
+      pm.clutch = Math.min((pm.clutch || p.clutch) + 12, 95);
       state.abilityActive = { type: 'ghost-goal' };
       break;
 
@@ -3981,16 +4219,16 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Tree Shot':
-      pm.tekkers = 99;
+      pm.tekkers = Math.min((pm.tekkers || p.tekkers) + 15, 99);
       if (state.cpuCard) {
         const rs = STATS[Math.floor(Math.random() * STATS.length)];
-        cm[rs] = (cm[rs] || state.cpuCard[rs]) - 20;
+        cm[rs] = (cm[rs] || state.cpuCard[rs]) - 8;
       }
       break;
 
     case 'Loyalty':
       if (state.isPlayerTurn) {
-        STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 15; });
+        STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 5; });
       }
       break;
 
@@ -4008,7 +4246,7 @@ async function activateAbility(auto = false) {
       } else if (state.cpuCard) {
         let best = 'pace', bv = 0;
         STATS.forEach(s => { if ((cm[s] || state.cpuCard[s]) > bv) { bv = cm[s] || state.cpuCard[s]; best = s; } });
-        cm[best] = (cm[best] || state.cpuCard[best]) - 30;
+        cm[best] = (cm[best] || state.cpuCard[best]) - 12;
       }
       break;
 
@@ -4023,17 +4261,17 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Glass Legs':
-      pm.tekkers = 95;
+      pm.tekkers = Math.min((pm.tekkers || p.tekkers) + 12, 95);
       ['shithousery','madness','clutch','vibes'].forEach(s => { pm[s] = (pm[s] || p[s]) - 10; });
       break;
 
     case 'Va Va Voom':
-      STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 5; });
+      STATS.forEach(s => { pm[s] = (pm[s] || p[s]) + 2; });
       state.abilityActive = { type: 'reveal-cpu' };
       break;
 
     case 'The Celebration':
-      pm.clutch = 99;
+      pm.clutch = Math.min((pm.clutch || p.clutch) + 15, 99);
       state.abilityActive = { type: 'extra-win-card' };
       break;
 
@@ -4051,13 +4289,13 @@ async function activateAbility(auto = false) {
       break;
 
     case 'SIUUU':
-      STATS.forEach(s => { pm[s] = 90; });
+      STATS.forEach(s => { pm[s] = Math.min((pm[s] || p[s]) + 8, 90); });
       break;
 
     case 'Viking Mode':
       { let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((pm[s] || p[s]) > bv) { bv = pm[s] || p[s]; best = s; } });
-        pm[best] = (pm[best] || p[best]) + 15; }
+        pm[best] = (pm[best] || p[best]) + 6; }
       break;
 
     case 'Cut Inside':
@@ -4068,9 +4306,9 @@ async function activateAbility(auto = false) {
       break;
 
     case 'Chat Shit':
-      pm.shithousery = 99;
+      pm.shithousery = Math.min((pm.shithousery || p.shithousery) + 15, 99);
       if (state.cpuCard) {
-        STATS.forEach(s => { cm[s] = (cm[s] || state.cpuCard[s]) - 8; });
+        STATS.forEach(s => { cm[s] = (cm[s] || state.cpuCard[s]) - 3; });
       }
       break;
 
@@ -4079,8 +4317,8 @@ async function activateAbility(auto = false) {
       break;
 
     case 'The Volley':
-      pm.tekkers = 98;
-      pm.clutch = 5;
+      pm.tekkers = Math.min((pm.tekkers || p.tekkers) + 15, 98);
+      pm.clutch = Math.max((pm.clutch || p.clutch) - 10, 5);
       break;
 
     case 'Why Always Me':
@@ -4120,26 +4358,26 @@ async function applyCPUAbility() {
   // Apply a subset of abilities for CPU
   switch (ab.name) {
     case 'Rolls Royce':
-      STATS.forEach(s => { cm[s] = (cm[s] || c[s]) + 8; }); break;
+      STATS.forEach(s => { cm[s] = (cm[s] || c[s]) + 3; }); break;
     case 'Unhinged':
       if (state.playerCard) {
         if (!state.roundStats.player) state.roundStats.player = {};
         const pm = state.roundStats.player;
         if (!state.abilityActive || state.abilityActive.type !== 'immune') {
-          STATS.forEach(s => { pm[s] = (pm[s] || state.playerCard[s]) - 10; });
+          STATS.forEach(s => { pm[s] = (pm[s] || state.playerCard[s]) - 4; });
         }
       }
       break;
     case 'Zero Fear':
-      cm.clutch = 99; break;
+      cm.clutch = Math.min((cm.clutch || c.clutch) + 15, 99); break;
     case 'Free Kick':
-      cm.tekkers = 99; cm.clutch = 99; break;
+      cm.tekkers = Math.min((cm.tekkers || c.tekkers) + 15, 99); cm.clutch = Math.min((cm.clutch || c.clutch) + 15, 99); break;
     case 'SIUUU':
-      STATS.forEach(s => { cm[s] = 90; }); break;
+      STATS.forEach(s => { cm[s] = Math.min((cm[s] || c[s]) + 8, 90); }); break;
     case 'Viking Mode':
       { let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((cm[s] || c[s]) > bv) { bv = cm[s] || c[s]; best = s; } });
-        cm[best] = (cm[best] || c[best]) + 15; }
+        cm[best] = (cm[best] || c[best]) + 6; }
       break;
     case 'The Grab':
       if (state.playerCard && (!state.abilityActive || state.abilityActive.type !== 'immune')) {
@@ -4147,31 +4385,31 @@ async function applyCPUAbility() {
         const pm = state.roundStats.player;
         let best = 'tekkers', bv = 0;
         STATS.forEach(s => { if ((pm[s] || state.playerCard[s]) > bv) { bv = pm[s] || state.playerCard[s]; best = s; } });
-        pm[best] = (pm[best] || state.playerCard[best]) - 25;
+        pm[best] = (pm[best] || state.playerCard[best]) - 10;
       }
       break;
     case 'The Stare':
       if (state.playerCard && (!state.abilityActive || state.abilityActive.type !== 'immune')) {
         if (!state.roundStats.player) state.roundStats.player = {};
         const pm = state.roundStats.player;
-        STATS.forEach(s => { pm[s] = (pm[s] || state.playerCard[s]) - 12; });
+        STATS.forEach(s => { pm[s] = (pm[s] || state.playerCard[s]) - 5; });
       }
       break;
     case 'Chat Shit':
-      cm.shithousery = 99;
+      cm.shithousery = Math.min((cm.shithousery || c.shithousery) + 15, 99);
       if (state.playerCard && (!state.abilityActive || state.abilityActive.type !== 'immune')) {
         if (!state.roundStats.player) state.roundStats.player = {};
-        STATS.forEach(s => { state.roundStats.player[s] = (state.roundStats.player[s] || state.playerCard[s]) - 8; });
+        STATS.forEach(s => { state.roundStats.player[s] = (state.roundStats.player[s] || state.playerCard[s]) - 3; });
       }
       break;
     case 'Big Laugh':
-      cm.vibes = 99; break;
+      cm.vibes = Math.min((cm.vibes || c.vibes) + 15, 99); break;
     case 'Psycho':
-      cm.madness = (cm.madness || c.madness) + 20;
-      cm.clutch = (cm.clutch || c.clutch) - 15;
+      cm.madness = (cm.madness || c.madness) + 8;
+      cm.clutch = (cm.clutch || c.clutch) - 6;
       break;
     case 'Long Bomb':
-      cm.shithousery = 92; break;
+      cm.shithousery = Math.min((cm.shithousery || c.shithousery) + 12, 92); break;
     // Other CPU abilities just get a visual flash but no mechanical effect (keeps it fair)
   }
 
@@ -4222,6 +4460,7 @@ async function resolveRound(stat) {
       updateCounts();
       updateWarPile();
       await delay(800);
+      hideBanner();
       return nextRound();
     } else {
       showBanner('THE CON WORKS!', 'ability');
@@ -4237,6 +4476,7 @@ async function resolveRound(stat) {
       updateCounts();
       updateWarPile();
       await delay(800);
+      hideBanner();
       return nextRound();
     }
   }
@@ -4263,6 +4503,7 @@ async function resolveRound(stat) {
     state.cpuCard = null;
     updateCounts(); updateWarPile();
     await delay(800);
+    hideBanner();
     return nextRound();
   }
 
@@ -4279,6 +4520,7 @@ async function resolveRound(stat) {
     state.cpuCard = null;
     updateCounts(); updateWarPile();
     await delay(800);
+    hideBanner();
     return nextRound();
   }
 
@@ -4306,6 +4548,7 @@ async function resolveRound(stat) {
     state.cpuCard = null;
     updateCounts(); updateWarPile();
     await delay(500);
+    hideBanner();
     return nextRound();
   }
 
@@ -4336,6 +4579,7 @@ async function resolveRound(stat) {
       state.cpuCard = null;
       updateCounts(); updateWarPile();
       await delay(800);
+      hideBanner();
       return nextRound();
     } else {
       showBanner('HE SLIPPED!', 'lose');
@@ -4349,6 +4593,7 @@ async function resolveRound(stat) {
       state.cpuCard = null;
       updateCounts(); updateWarPile();
       await delay(800);
+      hideBanner();
       return nextRound();
     }
   }
@@ -4370,6 +4615,7 @@ async function resolveRound(stat) {
       state.cpuCard = null;
       updateCounts(); updateWarPile();
       await delay(800);
+      hideBanner();
       return nextRound();
     }
     // Otherwise, fall through to normal comparison
@@ -4381,6 +4627,7 @@ async function resolveRound(stat) {
       showBanner('AGUEROOOO!', 'win');
       screenShake(); screenFlash('gold', 500);
       await delay(1200);
+      hideBanner();
       state.roundsWon++; state.currentStreak++;
       if (state.currentStreak > state.bestStreak) state.bestStreak = state.currentStreak;
       awardCards('player', [state.playerCard, state.cpuCard, ...state.warPot]);
@@ -4390,6 +4637,7 @@ async function resolveRound(stat) {
       state.cpuCard = null;
       updateCounts(); updateWarPile();
       await delay(800);
+      hideBanner();
       return nextRound();
     }
   }
@@ -4495,6 +4743,9 @@ async function resolveRound(stat) {
     state.roundsLost++;
     state.currentStreak = 0;
 
+    // CPU gains energy on win (mirrors player system)
+    state.cpuEnergy = Math.min(state.cpuMaxEnergy, state.cpuEnergy + 1);
+
     // Red Mist penalty
     if (aa && aa.type === 'red-mist' && state.playerWon.length > 0) {
       state.cpuWon.push(state.playerWon.pop());
@@ -4509,6 +4760,7 @@ async function resolveRound(stat) {
       showBanner('KUNG FU KICK! REPLAY!', 'ability');
       screenShake(); screenFlash('gold', 400);
       await delay(1200);
+      hideBanner();
       // Return player card to hand, discard cpu card, replay
       state.playerHand.push(state.playerCard);
       state.cpuPile.push(state.cpuCard);
@@ -4537,9 +4789,9 @@ async function resolveRound(stat) {
   updateCounts();
   updateWarPile();
 
-  await delay(1800);
+  await delay(1200);
   hideBanner();
-  await delay(400);
+  await delay(300);
 
   // Offer trade window after player wins (every TRADE_INTERVAL wins)
   if (playerWins && shouldOfferTrade()) {
@@ -4649,6 +4901,8 @@ async function triggerWar(stat) {
     state.isPlayerTurn = false;
     state.roundsLost++;
     state.currentStreak = 0;
+    // CPU gains +2 energy on war win (mirrors player system)
+    state.cpuEnergy = Math.min(state.cpuMaxEnergy, state.cpuEnergy + 2);
     const warLoseLabel = state.warLevel >= 3 ? '🔥 TOTAL WAR LOST' : state.warLevel >= 2 ? 'DOUBLE WAR LOST' : 'WAR LOST';
     showBanner(warLoseLabel, 'lose');
     screenFlash('red', 200);
@@ -4663,9 +4917,9 @@ async function triggerWar(stat) {
   // Return to gameplay music after war resolves
   playGameplayMusic();
 
-  await delay(1800);
+  await delay(1200);
   hideBanner();
-  await delay(400);
+  await delay(300);
   nextRound();
 }
 
@@ -4706,9 +4960,20 @@ function calcScore(won) {
   return 1000 + (state.bestStreak * 50) + (efficiency * 5) + (state.warsWon * 40) + (state.abilitiesUsed * 10) + speedBonus - (totalRounds * 2);
 }
 
-function endGame(playerWon) {
+async function endGame(playerWon) {
   state.phase = 'gameover';
-  document.getElementById('exit-btn').style.display = 'none';
+
+  // ── Dissolve ALL cards & game UI off screen ──
+  const gameScreen = document.getElementById('game-screen');
+  if (gameScreen) {
+    gameScreen.classList.add('game-screen-dissolving');
+    await new Promise(r => setTimeout(r, 1200)); // wait for dissolve animation
+  }
+
+  // Hide the game screen
+  gameScreen.style.display = 'none';
+  if (gameScreen) gameScreen.classList.remove('game-screen-dissolving');
+
   const goEl = document.getElementById('game-over');
   const title = document.getElementById('go-title');
   const sub = document.getElementById('go-sub');
@@ -4720,12 +4985,35 @@ function endGame(playerWon) {
   const totalRounds = state.roundsWon + state.roundsLost + state.roundsDrawn;
   const score = calcScore(playerWon);
 
+  // Clear any previous confetti
+  document.querySelectorAll('.victory-confetti').forEach(el => el.remove());
+
   // Play victory or defeat music
   if (playerWon) {
     playVictoryMusic();
-    goEl.className = 'victory';
-    title.textContent = 'You Win!';
-    sub.textContent = `All 52 legends are yours, ${playerName}. You are THE GAFFER.`;
+    goEl.className = 'victory victory-dissolve-in';
+    title.innerHTML = '<div class="victory-trophy">🏆</div>YOU\'RE THE GAFFER';
+    sub.innerHTML = `Kiss the camera. Rip off the shirt. Get booked.`;
+
+    // Launch confetti
+    const colors = ['#d4af37', '#f0d060', '#fff', '#ffd700', '#e74c3c', '#2ecc71', '#4a90d9'];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement('div');
+      c.className = 'victory-confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = Math.random() * 2 + 's';
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      c.style.width = (6 + Math.random() * 8) + 'px';
+      c.style.height = (6 + Math.random() * 8) + 'px';
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(c);
+    }
+    // Clean up confetti after animations
+    setTimeout(() => document.querySelectorAll('.victory-confetti').forEach(el => el.remove()), 5000);
+
+    // Screen flash
+    screenFlash('gold', 500);
   } else {
     playDefeatMusic();
     goEl.className = 'defeat';
@@ -4841,60 +5129,8 @@ function clearLeaderboard() {
 // ═══════════════════════════════════════════════════════════
 // SUPERPOWER GIF FLASH EFFECT — iconic moments for each player
 // ═══════════════════════════════════════════════════════════
-const SUPERPOWER_GIFS = {
-  "Peter Schmeichel": "https://media.giphy.com/media/l0HlFZ3c4NENSLQRi/giphy.gif",
-  "Petr Čech": "https://media.giphy.com/media/3o6ZsYm5kaLKqBgIvu/giphy.gif",
-  "Jens Lehmann": "https://media.giphy.com/media/l0HlvB82aMHlGMXeg/giphy.gif",
-  "David Seaman": "https://media.giphy.com/media/3o7TKF1fSIs1R19B8k/giphy.gif",
-  "David James": "https://media.giphy.com/media/26FLgGTPUDH6UGAbm/giphy.gif",
-  "Jerzy Dudek": "https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif",
-  "Tim Howard": "https://media.giphy.com/media/xTiTnwgQ8Wjs1sUB4k/giphy.gif",
-  "Shaka Hislop": "https://media.giphy.com/media/3o6ZtpxSZbQRRnwCKQ/giphy.gif",
-  "Paul Robinson": "https://media.giphy.com/media/l0ExayQDzrI2xOb8A/giphy.gif",
-  "Neville Southall": "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
-  "Heurelho Gomes": "https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif",
-  "Robert Green": "https://media.giphy.com/media/l2JhpjWPccQhsAMfu/giphy.gif",
-  "Massimo Taibi": "https://media.giphy.com/media/l0HlvB82aMHlGMXeg/giphy.gif",
-  "Rio Ferdinand": "https://media.giphy.com/media/3o6ZsYm5kaLKqBgIvu/giphy.gif",
-  "John Terry": "https://media.giphy.com/media/26FLgGTPUDH6UGAbm/giphy.gif",
-  "Ashley Cole": "https://media.giphy.com/media/l0HlFZ3c4NENSLQRi/giphy.gif",
-  "Nemanja Vidić": "https://media.giphy.com/media/3o7TKF1fSIs1R19B8k/giphy.gif",
-  "Stuart Pearce": "https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif",
-  "Vinnie Jones": "https://media.giphy.com/media/xTiTnwgQ8Wjs1sUB4k/giphy.gif",
-  "Gary Neville": "https://media.giphy.com/media/3o6ZtpxSZbQRRnwCKQ/giphy.gif",
-  "Patrice Evra": "https://media.giphy.com/media/l0ExayQDzrI2xOb8A/giphy.gif",
-  "Virgil van Dijk": "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
-  "Jaap Stam": "https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif",
-  "Martin Keown": "https://media.giphy.com/media/l2JhpjWPccQhsAMfu/giphy.gif",
-  "Micah Richards": "https://media.giphy.com/media/26FLgGTPUDH6UGAbm/giphy.gif",
-  "Titus Bramble": "https://media.giphy.com/media/l0HlvB82aMHlGMXeg/giphy.gif",
-  "Paul Gascoigne": "https://media.giphy.com/media/xT0xeJpnrWC3Nbo8jK/giphy.gif",
-  "David Beckham": "https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif",
-  "Steven Gerrard": "https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif",
-  "Frank Lampard": "https://media.giphy.com/media/l0HlFZ3c4NENSLQRi/giphy.gif",
-  "Roy Keane": "https://media.giphy.com/media/xTiTnwgQ8Wjs1sUB4k/giphy.gif",
-  "Patrick Vieira": "https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif",
-  "Paul Scholes": "https://media.giphy.com/media/3o7TKF1fSIs1R19B8k/giphy.gif",
-  "Matt Le Tissier": "https://media.giphy.com/media/3o6ZtpxSZbQRRnwCKQ/giphy.gif",
-  "Jack Grealish": "https://media.giphy.com/media/l0ExayQDzrI2xOb8A/giphy.gif",
-  "Cole Palmer": "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
-  "Joey Barton": "https://media.giphy.com/media/l2JhpjWPccQhsAMfu/giphy.gif",
-  "Lee Bowyer": "https://media.giphy.com/media/26FLgGTPUDH6UGAbm/giphy.gif",
-  "Kieron Dyer": "https://media.giphy.com/media/l0HlvB82aMHlGMXeg/giphy.gif",
-  "Thierry Henry": "https://media.giphy.com/media/l0HlFZ3c4NENSLQRi/giphy.gif",
-  "Alan Shearer": "https://media.giphy.com/media/3o6ZsYm5kaLKqBgIvu/giphy.gif",
-  "Wayne Rooney": "https://media.giphy.com/media/xT0xeJpnrWC3Nbo8jK/giphy.gif",
-  "Eric Cantona": "https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif",
-  "Sergio Agüero": "https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif",
-  "Cristiano Ronaldo": "https://media.giphy.com/media/xTiTnwgQ8Wjs1sUB4k/giphy.gif",
-  "Erling Haaland": "https://media.giphy.com/media/3o7TKF1fSIs1R19B8k/giphy.gif",
-  "Mo Salah": "https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif",
-  "Jamie Vardy": "https://media.giphy.com/media/3o6ZtpxSZbQRRnwCKQ/giphy.gif",
-  "Luis Suárez": "https://media.giphy.com/media/l0ExayQDzrI2xOb8A/giphy.gif",
-  "Paolo Di Canio": "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
-  "Mario Balotelli": "https://media.giphy.com/media/l2JhpjWPccQhsAMfu/giphy.gif",
-  "Ali Dia": "https://media.giphy.com/media/26FLgGTPUDH6UGAbm/giphy.gif",
-};
+// SUPERPOWER_GIFS removed — broken Giphy URLs replaced by themed emoji visuals below
+const SUPERPOWER_GIFS = {};
 
 // ── Crowd Cheer SFX (synthesized stadium roar — LOUD & EPIC) ──
 function playCrowdCheer() {
@@ -4977,8 +5213,9 @@ function showSuperpowerFlash(card) {
   const inner = document.createElement('div');
   inner.style.cssText = 'text-align:center;animation:spSlam 0.5s cubic-bezier(0.2,0,0.1,1);z-index:1;position:relative';
 
-  const gifUrl = SUPERPOWER_GIFS[card.name];
-  const gifHTML = gifUrl ? `<div style="width:clamp(200px,55vw,340px);height:clamp(150px,40vw,250px);margin:0 auto 1rem;border-radius:12px;overflow:hidden;border:3px solid var(--gold);box-shadow:0 0 50px rgba(212,175,55,0.4);animation:spBlink 0.3s ease 3"><img src="${gifUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display='none'"></div>` : '';
+  // Use the player's loaded card photo as the superpower backdrop (no broken external GIFs)
+  const playerImg = card.img;
+  const photoHTML = playerImg ? `<div style="width:clamp(120px,35vw,200px);height:clamp(120px,35vw,200px);margin:0 auto 0.8rem;border-radius:50%;overflow:hidden;border:3px solid var(--gold);box-shadow:0 0 50px rgba(212,175,55,0.5),0 0 100px rgba(212,175,55,0.2);animation:spBlink 0.3s ease 3"><img src="${playerImg}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display='none'"></div>` : '';
 
   const emojiMap = {
     'Star-Fish':'🌟', 'The Helmet':'⛑️', 'Unhinged':'😤', 'The Ponytail':'💇', 'Calamity':'💥',
@@ -4998,7 +5235,7 @@ function showSuperpowerFlash(card) {
 
   inner.innerHTML = `
     <div style="font-family:'Oswald',sans-serif;font-size:clamp(0.6rem,1.5vw,0.8rem);text-transform:uppercase;letter-spacing:0.4em;color:var(--gold);margin-bottom:0.5rem;animation:spBlink 0.5s ease 4">⚡ SUPERPOWER ACTIVATED ⚡</div>
-    ${gifHTML}
+    ${photoHTML}
     <div style="font-size:clamp(3rem,12vw,6rem);line-height:1;animation:spFlash 0.6s ease">${emoji}</div>
     <div style="font-family:'Oswald',sans-serif;font-size:clamp(2rem,6vw,3.5rem);color:var(--gold);text-transform:uppercase;letter-spacing:0.12em;margin-top:0.3rem;text-shadow:0 0 30px rgba(212,175,55,0.6);animation:spBlink 0.4s ease 5">${card.ability.name}</div>
     <div style="font-size:0.9rem;color:#ccc;margin-top:0.5rem;max-width:320px;margin-left:auto;margin-right:auto">${card.ability.desc}</div>
@@ -5046,8 +5283,8 @@ function showAbilityTutorial(card) {
           <div>3. Tap it <strong style="color:#fff">before</strong> picking your stat!</div>
         </div>
       </div>
-      <p style="color:#e74c3c;font-weight:600;font-size:1rem">⚠️ Only <span class="tut-highlight">${ABILITY_CAP} superpowers per game</span></p>
-      <p style="color:#777;font-size:0.82rem">Choose your moments — the crowd goes wild when you deploy one.</p>
+      <p style="color:#e74c3c;font-weight:600;font-size:1rem">⚠️ Each superpower costs <span class="tut-highlight">1 energy ⚡</span></p>
+      <p style="color:#777;font-size:0.82rem">Win rounds to earn energy — choose your moments wisely!</p>
       <button class="tut-btn" onclick="this.closest('.tutorial-overlay').remove()" style="font-size:1rem;padding:0.7rem 2.5rem;margin-top:0.5rem">Let's Go!</button>
     </div>
   `;
@@ -5187,7 +5424,7 @@ function playTrack(url, { crossfade = 1.5, loop = true, volume = 0.7, autoShuffl
 
 // ── High-level music functions called by game logic ──
 function playIntroMusic() {
-  playTrack(MUSIC_TRACKS.intro, { crossfade: 0.5, loop: true, volume: 0.6 });
+  playTrack(MUSIC_TRACKS.intro, { crossfade: 0, loop: true, volume: 0.6 });
 }
 
 function playMenuMusic() {
