@@ -1699,7 +1699,7 @@ body.shake { animation: shake 0.5s ease; }
       <div id="draft-player-squad" style="display:flex; flex-wrap:wrap; gap:0.5rem; min-height:50px"></div>
     </div>
     <div style="text-align:center">
-      <div style="font-family:'Oswald',sans-serif; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.2em; color:#555; margin-bottom:0.4rem">CPU Squad</div>
+      <div id="draft-cpu-squad-label" style="font-family:'Oswald',sans-serif; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.2em; color:#555; margin-bottom:0.4rem">CPU Squad</div>
       <div id="draft-cpu-squad" style="display:flex; flex-wrap:wrap; gap:0.5rem; min-height:50px"></div>
     </div>
   </div>
@@ -1903,6 +1903,7 @@ let gameMode = 'cpu'; // 'cpu' or 'pvp'
 let peer = null; // PeerJS instance
 let peerConn = null; // active connection
 let isHost = false;
+let opponentName = ''; // Remote player's name in PvP
 
 // ═══════════════════════════════════════════════════════════
 // MUSIC SYSTEM — variables declared early so autoplay code can access them
@@ -2214,6 +2215,15 @@ function startFromGate(mode) {
 
 // ── EXIT / HOME — quit game and return to title ──
 function goHome() {
+  // Clean up PvP connection
+  if (peerConn) { try { peerConn.close(); } catch(e) {} peerConn = null; }
+  opponentName = '';
+  pvpReady = false;
+  pvpStarting = false;
+  gameMode = 'cpu';
+  window._pvpDraftResolve = null;
+  window._pvpCardResolve = null;
+
   // Hide all screens
   document.getElementById('game-screen').style.display = 'none';
   document.getElementById('game-over').style.display = 'none';
@@ -2272,34 +2282,82 @@ function generateRoomCode() {
 function ensurePeer() {
   return new Promise((resolve, reject) => {
     if (peer && !peer.destroyed) return resolve(peer);
+    const createPeer = () => {
+      peer = new Peer(undefined, {
+        debug: 1,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+          ]
+        }
+      });
+      peer.on('open', () => resolve(peer));
+      peer.on('error', e => { console.error('PeerJS error:', e); reject(e); });
+    };
     // Load PeerJS from CDN
     if (!window.Peer) {
       const s = document.createElement('script');
       s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-      s.onload = () => {
-        peer = new Peer();
-        peer.on('open', () => resolve(peer));
-        peer.on('error', e => reject(e));
-      };
-      s.onerror = () => reject(new Error('Failed to load PeerJS'));
+      s.onload = createPeer;
+      s.onerror = () => reject(new Error('Failed to load PeerJS library'));
       document.head.appendChild(s);
     } else {
-      peer = new Peer();
-      peer.on('open', () => resolve(peer));
-      peer.on('error', e => reject(e));
+      createPeer();
     }
   });
+}
+
+// ── PvP HANDSHAKE: both players must exchange names before game starts ──
+let pvpReady = false; // true once BOTH sides confirmed
+
+function getMyName() {
+  const ni = document.getElementById('gate-name-input');
+  return (ni ? ni.value.trim() : '') || 'THE GAFFER';
+}
+
+function pvpHandshake() {
+  // Send our name + ready signal
+  const myName = getMyName();
+  sendPeer({ type: 'name', name: myName });
+  sendPeer({ type: 'ready' });
+}
+
+let pvpStarting = false;
+function pvpStartIfBothReady() {
+  if (pvpStarting) return; // prevent double-start
+  const status = document.getElementById('pvp-status');
+  if (!pvpReady || !opponentName) return; // wait for both
+  pvpStarting = true;
+  status.innerHTML = `<div style="color:var(--gold); font-size:1.2rem">⚡ ${getMyName()} vs ${opponentName} ⚡</div><div style="font-size:0.8rem; color:#888; margin-top:0.5rem">Starting match...</div>`;
+  setTimeout(() => {
+    document.getElementById('pvp-screen').style.display = 'none';
+    pvpStarting = false;
+    startGameWithName('pvp');
+  }, 1200);
 }
 
 async function createRoom() {
   const status = document.getElementById('pvp-status');
   status.textContent = 'Creating room...';
+  pvpReady = false;
+  opponentName = '';
   try {
     const code = generateRoomCode();
     await ensurePeer();
     // Destroy and recreate with custom ID
     peer.destroy();
-    peer = new Peer('gaffer26-' + code);
+    peer = new Peer('gaffer26-' + code, {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+      }
+    });
     await new Promise((res, rej) => { peer.on('open', res); peer.on('error', rej); });
 
     status.innerHTML = `<div style="margin-bottom:0.5rem">Your room code:</div><div style="font-size:2.5rem; color:var(--gold); letter-spacing:0.4em; font-weight:700">${code}</div><button onclick="navigator.clipboard.writeText('${code}');this.textContent='Copied!'" style="font-family:'Oswald',sans-serif; font-size:0.75rem; padding:0.3rem 1rem; border:1px solid #444; background:transparent; color:#999; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em; margin-top:0.5rem; border-radius:4px">Copy Code</button><div style="font-size:0.7rem; color:#555; margin-top:0.5rem">Share this code with your opponent</div>`;
@@ -2308,14 +2366,15 @@ async function createRoom() {
     peer.on('connection', conn => {
       peerConn = conn;
       setupPeerConnection(conn);
-      status.textContent = 'Opponent connected! Starting...';
-      setTimeout(() => {
-        document.getElementById('pvp-screen').style.display = 'none';
-        startGameWithName('pvp');
-      }, 1000);
+      const sendName = () => {
+        pvpHandshake();
+        status.innerHTML = `<div style="color:#4a90d9">Opponent connected!</div><div style="font-size:0.8rem; color:#888; margin-top:0.3rem">Waiting for ${opponentName || 'them'} to be ready...</div>`;
+      };
+      conn.on('open', sendName);
+      if (conn.open) sendName();
     });
   } catch(e) {
-    status.textContent = 'Connection failed. Try vs CPU instead.';
+    status.textContent = 'Connection failed — PeerJS server may be down. Try again in a moment.';
     console.error(e);
   }
 }
@@ -2325,32 +2384,46 @@ async function joinRoom() {
   if (!code) return;
   const status = document.getElementById('pvp-status');
   status.textContent = 'Connecting...';
+  pvpReady = false;
+  opponentName = '';
   try {
     await ensurePeer();
-    peerConn = peer.connect('gaffer26-' + code);
+    peerConn = peer.connect('gaffer26-' + code, { reliable: true });
     peerConn.on('open', () => {
       setupPeerConnection(peerConn);
       isHost = false;
-      status.textContent = 'Connected! Starting...';
-      setTimeout(() => {
-        document.getElementById('pvp-screen').style.display = 'none';
-        startGameWithName('pvp');
-      }, 1000);
+      pvpHandshake();
+      status.innerHTML = `<div style="color:#4a90d9">Connected to room!</div><div style="font-size:0.8rem; color:#888; margin-top:0.3rem">Waiting for host to be ready...</div>`;
     });
-    peerConn.on('error', () => { status.textContent = 'Room not found. Check the code.'; });
+    peerConn.on('error', (e) => {
+      console.error('PeerJS error:', e);
+      status.textContent = 'Room not found. Check the code and try again.';
+    });
     setTimeout(() => {
-      if (!peerConn.open) status.textContent = 'Room not found. Check the code.';
-    }, 5000);
+      if (!peerConn || !peerConn.open) status.textContent = 'Could not connect. Check the code or ask host to recreate the room.';
+    }, 8000);
   } catch(e) {
-    status.textContent = 'Connection failed. Try vs CPU instead.';
+    status.textContent = 'Connection failed — PeerJS server may be down. Try again in a moment.';
   }
 }
 
 function setupPeerConnection(conn) {
-  conn.on('data', data => handlePeerMessage(data));
+  conn.on('data', data => {
+    if (data && data.type === 'ping') { sendPeer({ type: 'pong' }); return; }
+    if (data && data.type === 'pong') return;
+    handlePeerMessage(data);
+  });
   conn.on('close', () => {
     if (state.phase !== 'gameover') {
       alert('Opponent disconnected');
+      goHome();
+      document.getElementById('game-screen').style.display = 'none';
+    }
+  });
+  conn.on('error', (e) => {
+    console.error('PeerJS connection error:', e);
+    if (state.phase !== 'gameover') {
+      alert('Connection error — opponent may have disconnected');
       goHome();
       document.getElementById('game-screen').style.display = 'none';
     }
@@ -2364,29 +2437,65 @@ function sendPeer(msg) {
 function handlePeerMessage(data) {
   // PvP message handling
   switch(data.type) {
+    case 'name':
+      opponentName = data.name;
+      document.getElementById('p2-name-display').textContent = opponentName;
+      document.getElementById('opponent-label').textContent = opponentName;
+      // If we haven't sent our name back yet, do so now
+      if (!pvpReady) pvpHandshake();
+      pvpStartIfBothReady();
+      break;
+    case 'ready':
+      pvpReady = true;
+      pvpStartIfBothReady();
+      break;
+
+    // ── DRAFT SYNC ──
+    case 'draft-deck':
+      // Host sends the round structure to joiner so both see the same cards
+      if (!isHost) window._pvpDraftDeck = data.deck;
+      break;
+    case 'draft-pick':
+      // Opponent picked a card during draft
+      if (typeof window._pvpDraftResolve === 'function') {
+        window._pvpDraftResolve(data.cardName);
+      }
+      break;
+
+    // ── BATTLE SYNC ──
     case 'card-played':
-      // Opponent played a card
-      state.cpuCard = PACKS[selectedPack].cards.find(c => c.name === data.cardName);
-      if (state.cpuCard) {
-        state.cpuCard = {...state.cpuCard, ability: {...state.cpuCard.ability}};
-        renderCard(state.cpuCard, document.getElementById('cpu-card-front'));
-        document.getElementById('cpu-card').classList.add('flipped');
-        showCommentary(state.cpuCard, false);
+      // Opponent played a card in battle — find it in their local hand first, then fall back to pack
+      {
+        let cpuCardIdx = state.cpuHand ? state.cpuHand.findIndex(c => c.name === data.cardName) : -1;
+        if (cpuCardIdx >= 0) {
+          state.cpuCard = state.cpuHand.splice(cpuCardIdx, 1)[0];
+        } else {
+          state.cpuCard = PACKS[selectedPack].cards.find(c => c.name === data.cardName);
+          if (state.cpuCard) state.cpuCard = {...state.cpuCard, ability: {...state.cpuCard.ability}};
+        }
+        if (state.cpuCard) {
+          renderCard(state.cpuCard, document.getElementById('cpu-card-front'));
+          document.getElementById('cpu-card').classList.add('flipped');
+          playCardSound(state.cpuCard);
+          showCommentary(state.cpuCard, false);
+        }
+        // If we're waiting for opponent's card, resolve
+        if (typeof window._pvpCardResolve === 'function') {
+          window._pvpCardResolve();
+        }
       }
       break;
     case 'stat-picked':
-      // Opponent picked a stat (they're the turn owner)
+      // Opponent picked a stat (they're the turn owner) — now we pick our card
       state.cpuChosenStat = data.stat;
-      setTurn(`Opponent chose ${data.stat.toUpperCase()} — pick your card!`);
+      state.isPlayerTurn = false; // ensure selectCard routes to selectCardForCPUTurn
+      setTurn(`${opponentName || 'Opponent'} chose ${data.stat.toUpperCase()} — pick your card!`);
       state.phase = 'select-card';
+      renderHand(); // re-render hand so cards are clickable
       break;
     case 'ability-used':
       // Opponent used their ability
       applyCPUAbility();
-      break;
-    case 'name':
-      document.getElementById('p2-name-display').textContent = data.name;
-      document.getElementById('opponent-label').textContent = data.name;
       break;
   }
 }
@@ -2931,7 +3040,8 @@ function updateComeback() {
     el.textContent = '⚡ COMEBACK MODE — Abilities auto-activate';
   } else if (state.comebackCPU) {
     el.className = 'comeback-indicator cpu-comeback';
-    el.textContent = '⚡ CPU COMEBACK MODE';
+    const cbName = (gameMode === 'pvp') ? (opponentName || 'OPPONENT') : 'CPU';
+    el.textContent = `⚡ ${cbName.toUpperCase()} COMEBACK MODE`;
   } else {
     el.className = 'comeback-indicator';
     el.textContent = '';
@@ -3321,21 +3431,14 @@ let draftState = {
   onComplete: null,
 };
 
-function startDraft(fullDeck, onComplete) {
-  const shuffled = shuffle(fullDeck);
-
-  // Build rounds: each round shows 4 cards, one from each position (GK, DEF, MID, STR)
-  // This ensures CPU can't end up with all one position type
+function buildDraftRounds(shuffled) {
   const rounds = [];
   const usedCards = new Set();
   const positions = ['Goalkeeper', 'Defender', 'Midfielder', 'Striker'];
-
-  // Pool cards by position
   const pools = {};
   for (const pos of positions) {
     pools[pos] = shuffled.filter(c => c.position === pos);
   }
-
   for (let r = 0; r < DRAFT_ROUNDS; r++) {
     const roundCards = [];
     for (const pos of positions) {
@@ -3347,16 +3450,59 @@ function startDraft(fullDeck, onComplete) {
         usedCards.add(card);
       }
     }
-    // Shuffle the 4 cards so positions aren't always in the same order
     for (let i = roundCards.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [roundCards[i], roundCards[j]] = [roundCards[j], roundCards[i]];
     }
     rounds.push(roundCards);
   }
-
-  // Everything not used in draft rounds
   const remaining = shuffled.filter(c => !usedCards.has(c));
+  return { rounds, remaining };
+}
+
+async function startDraft(fullDeck, onComplete) {
+  let rounds, remaining;
+
+  if (gameMode === 'pvp' && !isHost) {
+    // Joiner: wait for host's draft structure
+    if (!window._pvpDraftDeck) {
+      await new Promise(resolve => {
+        const check = setInterval(() => {
+          if (window._pvpDraftDeck) { clearInterval(check); resolve(); }
+        }, 100);
+        setTimeout(() => { clearInterval(check); resolve(); }, 10000);
+      });
+    }
+    if (window._pvpDraftDeck) {
+      const data = window._pvpDraftDeck;
+      window._pvpDraftDeck = null;
+      // Reconstruct rounds and remaining from card names
+      rounds = data.rounds.map(roundNames =>
+        roundNames.map(name => fullDeck.find(c => c.name === name)).filter(Boolean)
+      );
+      remaining = (data.remaining || []).map(name => fullDeck.find(c => c.name === name)).filter(Boolean);
+    } else {
+      const shuffled = shuffle(fullDeck);
+      ({ rounds, remaining } = buildDraftRounds(shuffled));
+    }
+  } else {
+    const shuffled = shuffle(fullDeck);
+    ({ rounds, remaining } = buildDraftRounds(shuffled));
+    // Host: send round structure + remaining order to joiner
+    if (gameMode === 'pvp' && isHost) {
+      sendPeer({
+        type: 'draft-deck',
+        deck: {
+          rounds: rounds.map(r => r.map(c => c.name)),
+          remaining: remaining.map(c => c.name)
+        }
+      });
+    }
+  }
+
+  // In PvP: host picks first round 1, joiner picks first round 2, etc.
+  // From local perspective: isHost picks first in odd rounds (0,2,4)
+  const localPicksFirst = (gameMode === 'pvp') ? isHost : true;
 
   draftState = {
     rounds,
@@ -3364,7 +3510,7 @@ function startDraft(fullDeck, onComplete) {
     roundCards: rounds[0] || [],
     playerPicks: [],
     cpuPicks: [],
-    isPlayerTurn: true, // Round 1 = player first, alternates each round
+    isPlayerTurn: localPicksFirst,
     remaining,
     onComplete,
   };
@@ -3375,12 +3521,25 @@ function startDraft(fullDeck, onComplete) {
   const screen = document.getElementById('draft-screen');
   screen.style.display = 'flex';
   document.getElementById('exit-btn').style.display = 'block';
+
+  // Update draft labels for PvP
+  if (gameMode === 'pvp') {
+    const oName = opponentName || 'Opponent';
+    document.getElementById('draft-info').textContent = `Pick 5 cards — alternating with ${oName}`;
+    document.getElementById('draft-cpu-squad-label').textContent = `${oName}'s Squad`;
+  } else {
+    document.getElementById('draft-info').textContent = 'Pick 5 cards — alternating with CPU';
+    document.getElementById('draft-cpu-squad-label').textContent = 'CPU Squad';
+  }
+
   updateDraftInfo();
   renderDraftPool();
   renderDraftSquads();
 
-  // Round 1 is player first; even rounds (index 1,3) will be CPU first
-  // (handled in advanceDraftRound)
+  // If opponent picks first this round (PvP), wait for their pick
+  if (gameMode === 'pvp' && !localPicksFirst) {
+    waitForPvPDraftPick();
+  }
 }
 
 function updateDraftInfo() {
@@ -3394,7 +3553,8 @@ function updateDraftInfo() {
     el.textContent = `Pick a card — one from each position`;
     el.style.color = 'var(--gold)';
   } else {
-    el.textContent = `CPU is picking...`;
+    const pickingName = (gameMode === 'pvp') ? (opponentName || 'Opponent') : 'CPU';
+    el.textContent = `${pickingName} is picking...`;
     el.style.color = '#e74c3c';
   }
 }
@@ -3468,18 +3628,53 @@ async function draftPickCard(index) {
   renderDraftPool();
   renderDraftSquads();
 
-  // Check if CPU already picked this round (CPU-first round)
+  // In PvP, send pick to opponent
+  if (gameMode === 'pvp') {
+    sendPeer({ type: 'draft-pick', cardName: card.name });
+  }
+
+  // Check if opponent already picked this round (opponent-first round)
   const cpuPickedThisRound = draftState.roundCards.some(c => draftState.cpuPicks.includes(c));
 
   if (cpuPickedThisRound) {
-    // CPU already picked first this round — player picked second, advance
+    // Opponent already picked first this round — player picked second, advance
     await delay(400);
     advanceDraftRound();
+  } else if (gameMode === 'pvp') {
+    // PvP: wait for opponent's pick
+    await delay(400);
+    waitForPvPDraftPick(true);
   } else {
-    // Player picked first — CPU picks from remaining, then advance
+    // CPU mode: AI picks from remaining, then advance
     await delay(800);
     cpuDraftPick(true);
   }
+}
+
+// Wait for opponent's draft pick via PeerJS
+function waitForPvPDraftPick(advanceAfter = false) {
+  updateDraftInfo();
+  renderDraftPool();
+  window._pvpDraftResolve = (cardName) => {
+    window._pvpDraftResolve = null;
+    const card = draftState.roundCards.find(c => c.name === cardName);
+    if (card && !draftState.playerPicks.includes(card) && !draftState.cpuPicks.includes(card)) {
+      draftState.cpuPicks.push(card);
+      screenFlash('red', 100);
+      renderDraftPool();
+      renderDraftSquads();
+    }
+    if (advanceAfter) {
+      setTimeout(() => advanceDraftRound(), 600);
+    } else {
+      // Opponent picked first — now it's our turn
+      setTimeout(() => {
+        draftState.isPlayerTurn = true;
+        updateDraftInfo();
+        renderDraftPool();
+      }, 600);
+    }
+  };
 }
 
 async function cpuDraftPick(advanceAfter) {
@@ -3539,15 +3734,25 @@ async function advanceDraftRound() {
 
   // Set up next round — alternate who picks first (snake draft)
   draftState.roundCards = draftState.rounds[draftState.currentRound];
-  const cpuPicksFirst = (draftState.currentRound % 2 === 1); // rounds 1,3 = CPU first; 0,2,4 = player first
-  draftState.isPlayerTurn = !cpuPicksFirst;
+  let opponentPicksFirst;
+  if (gameMode === 'pvp') {
+    // In PvP: host picks first on even rounds (0,2,4), joiner on odd (1,3)
+    opponentPicksFirst = isHost ? (draftState.currentRound % 2 === 1) : (draftState.currentRound % 2 === 0);
+  } else {
+    opponentPicksFirst = (draftState.currentRound % 2 === 1);
+  }
+  draftState.isPlayerTurn = !opponentPicksFirst;
   updateDraftInfo();
   renderDraftPool();
 
-  // If CPU picks first this round, trigger their pick
-  if (cpuPicksFirst) {
-    await delay(800);
-    cpuDraftPick(false); // false = don't advance, wait for player to pick
+  // If opponent picks first this round
+  if (opponentPicksFirst) {
+    if (gameMode === 'pvp') {
+      waitForPvPDraftPick(false); // false = don't advance, wait for player to pick
+    } else {
+      await delay(800);
+      cpuDraftPick(false);
+    }
   }
 }
 
@@ -3667,8 +3872,9 @@ function startGame() {
 
   // Update scoreboard names
   document.getElementById('p1-name-display').textContent = playerName || 'YOU';
-  if (gameMode === 'pvp' && peerConn) {
-    sendPeer({ type: 'name', name: playerName });
+  if (gameMode === 'pvp') {
+    document.getElementById('p2-name-display').textContent = opponentName || 'OPPONENT';
+    document.getElementById('opponent-label').textContent = opponentName || 'Opponent';
   } else {
     document.getElementById('p2-name-display').textContent = 'CPU';
     document.getElementById('opponent-label').textContent = 'CPU Card';
@@ -3680,8 +3886,12 @@ function startGame() {
   // DRAFT PHASE — player and CPU pick starting cards
   startDraft(fullDeck, (playerPicks, cpuPicks, remaining) => {
     // Build piles: drafted cards go to hand first, remaining split evenly
-    const leftover = shuffle(remaining);
+    // In PvP, use remaining as-is (same order on both machines from host)
+    const leftover = (gameMode === 'pvp') ? remaining : shuffle(remaining);
     const half = Math.floor(leftover.length / 2);
+
+    // In PvP, host always goes first (consistent between machines)
+    const firstTurn = (gameMode === 'pvp') ? isHost : (Math.random() > 0.5);
 
     state = {
       playerPile: leftover.slice(0, half),
@@ -3693,7 +3903,7 @@ function startGame() {
       playerCard: null,
       cpuCard: null,
       warPot: [],
-      isPlayerTurn: Math.random() > 0.5,
+      isPlayerTurn: firstTurn,
       phase: 'idle',
       abilityUsed: false,
       abilityActive: null,
@@ -3756,8 +3966,8 @@ async function nextRound() {
   state.roundNumber++;
   state.warLevel = 0;
 
-  // Update CPU difficulty based on round
-  updateCPUDifficulty();
+  // Update CPU difficulty based on round (not needed in PvP)
+  if (gameMode !== 'pvp') updateCPUDifficulty();
 
   // Update momentum display
   updateMomentum();
@@ -3802,6 +4012,12 @@ async function nextRound() {
   if (state.isPlayerTurn) {
     state.phase = 'select-card';
     setTurn(`${roundLabel} — Pick a card`);
+  } else if (gameMode === 'pvp') {
+    // PvP: wait for opponent to pick stat (they also pick their card on their end)
+    const oName = opponentName || 'Opponent';
+    state.phase = 'waiting-pvp';
+    setTurn(`${roundLabel} — ${oName} is choosing...`);
+    // The handlePeerMessage 'stat-picked' handler will set state.phase = 'select-card'
   } else {
     state.phase = 'select-card';
     setTurn(`${roundLabel} — CPU is choosing...`);
@@ -3903,18 +4119,32 @@ async function pickStat(stat) {
   document.getElementById('stat-buttons').classList.remove('active');
   document.getElementById('ability-btn').classList.remove('active');
 
-  // CPU selects card from hand
-  cpuPlayCard();
+  if (gameMode === 'pvp') {
+    // PvP: send our card + stat to opponent, then wait for their card
+    sendPeer({ type: 'card-played', cardName: state.playerCard.name });
+    sendPeer({ type: 'stat-picked', stat });
 
-  // Reveal CPU card with commentary
+    // Wait for opponent's card (they'll send 'card-played' when they pick)
+    if (!state.cpuCard) {
+      const oName = opponentName || 'Opponent';
+      setTurn(`Waiting for ${oName}'s card...`);
+      await new Promise(resolve => { window._pvpCardResolve = resolve; });
+      window._pvpCardResolve = null;
+    }
+  } else {
+    // CPU selects card from hand
+    cpuPlayCard();
+  }
+
+  // Reveal opponent card with commentary
   renderCard(state.cpuCard, document.getElementById('cpu-card-front'), state.roundStats.cpu);
   document.getElementById('cpu-card').classList.add('flipped');
   playCardSound(state.cpuCard);
 
   await showCommentary(state.cpuCard, false);
 
-  // CPU might use ability (requires energy — mirrors player system)
-  if (state.cpuEnergy > 0 && (state.comebackCPU || Math.random() < 0.35)) {
+  // CPU might use ability (requires energy — mirrors player system) — only in CPU mode
+  if (gameMode !== 'pvp' && state.cpuEnergy > 0 && (state.comebackCPU || Math.random() < 0.35)) {
     state.cpuEnergy--;
     await applyCPUAbility();
   }
@@ -3958,7 +4188,8 @@ async function cpuSelectCard() {
   await delay(500);
   let bestStat = cpuPickBestStat();
 
-  setTurn(`CPU chose ${bestStat.toUpperCase()} — pick your card!`);
+  const cpuLabel = (gameMode === 'pvp') ? (opponentName || 'Opponent') : 'CPU';
+  setTurn(`${cpuLabel} chose ${bestStat.toUpperCase()} — pick your card!`);
 
   // Now player must pick a card from hand, knowing the stat
   state.phase = 'select-card';
@@ -3968,10 +4199,15 @@ async function cpuSelectCard() {
   // When it's CPU turn, player picks card, then auto-resolves with CPU's stat
 }
 
-// Overload: when CPU already picked stat, clicking a hand card resolves
+// Overload: when opponent already picked stat, clicking a hand card resolves
 async function selectCardForCPUTurn(index) {
   state.playerCard = state.playerHand.splice(index, 1)[0];
   renderHand();
+
+  // In PvP, send our card to opponent
+  if (gameMode === 'pvp') {
+    sendPeer({ type: 'card-played', cardName: state.playerCard.name });
+  }
 
   // Apply streak bonus + halftime tactic
   if (!state.roundStats.player) state.roundStats.player = {};
@@ -4364,7 +4600,8 @@ async function applyCPUAbility() {
   const c = state.cpuCard;
 
   screenFlash('red', 200);
-  setTurn(`CPU activates ⚡ ${ab.name}!`);
+  const abLabel = (gameMode === 'pvp') ? (opponentName || 'Opponent') : 'CPU';
+  setTurn(`${abLabel} activates ⚡ ${ab.name}!`);
   await delay(800);
 
   // Apply a subset of abilities for CPU
@@ -5030,7 +5267,8 @@ async function endGame(playerWon) {
     playDefeatMusic();
     goEl.className = 'defeat';
     title.textContent = 'Defeated';
-    sub.textContent = `${playerName}, the opposition has all the cards. Time for a rematch.`;
+    const victor = (gameMode === 'pvp' && opponentName) ? opponentName : 'the opposition';
+    sub.textContent = `${playerName}, ${victor} has all the cards. Time for a rematch.`;
   }
 
   statsEl.innerHTML = `
