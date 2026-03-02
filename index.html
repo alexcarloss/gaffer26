@@ -2251,10 +2251,14 @@ function startGameWithName(mode) {
 }
 
 function showPvPSetup() {
+  // Hide splash so PvP screen is visible (splash is z-index:700)
+  document.getElementById('splash-overlay').style.display = 'none';
   document.getElementById('pvp-screen').style.display = 'flex';
 }
 function hidePvPSetup() {
   document.getElementById('pvp-screen').style.display = 'none';
+  // Restore splash with menu
+  revealTitleScreen();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -5141,11 +5145,13 @@ function esc(s) {
 
 function showLeaderboard() {
   renderLeaderboard();
+  document.getElementById('splash-overlay').style.display = 'none';
   document.getElementById('leaderboard-screen').style.display = 'flex';
 }
 
 function hideLeaderboard() {
   document.getElementById('leaderboard-screen').style.display = 'none';
+  revealTitleScreen();
 }
 
 function clearLeaderboard() {
